@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign};
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq,Copy)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -33,10 +33,13 @@ impl Vec3 {
             a.x * b.y - b.x * a.y,
         )
     }
-    pub fn modlen(&self) -> f64{
+    pub fn dot(a:Self,b:Self) -> f64{
+        (a.x * b.x + a.y * b.y + a.z * b.z) as f64
+    }
+    pub fn modlen(self) -> f64{
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt() as f64
     }
-    pub fn unit(&self) -> Self {
+    pub fn unit(self) -> Self {
         let len = self.modlen();
         Self::new(self.x / len, self.y / len, self.z / len)
     }
