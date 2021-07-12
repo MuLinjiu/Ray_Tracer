@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign};
+use std::ops::{Add, AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Vec3 {
@@ -23,6 +23,24 @@ impl Vec3 {
     pub fn squared_length(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
+    pub fn elementmul(a: Self, b: Self) -> Self {
+        Self::new(a.x * b.x, a.y * b.y, a.z * b.z)
+    }
+    
+    pub fn crossmul(a:Self, b:Self) -> Self{
+        Self::new(a.y * b.z - b.y * a.z,
+            b.x * a.z - a.x * b.z,
+            a.x * b.y - b.x * a.y,
+        )
+    }
+    pub fn modlen(&self) -> f64{
+        (self.x * self.x + self.y * self.y + self.z * self.z).sqrt() as f64
+    }
+    pub fn unit(&self) -> Self {
+        let len = self.modlen();
+        Self::new(self.x / len, self.y / len, self.z / len)
+    }
+    
 }
 
 impl Add for Vec3 {
@@ -59,6 +77,91 @@ impl AddAssign for Vec3 {
     }
 }
 
+impl Sub for Vec3{
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+impl Sub<f64> for Vec3 {
+    type Output = Self;
+
+    fn sub(self, other: f64) -> Self {
+        Self {
+            x: self.x - other,
+            y: self.y - other,
+            z: self.z - other,
+        }
+    }
+}
+
+impl SubAssign for Vec3 {
+    fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        };
+    }
+}
+
+impl Mul for Vec3{
+    type Output = f64;
+
+    fn mul(self,other:Self) -> f64{
+        (self.x * other.x + self.y * other.y + self.z * other.z) as f64
+    }
+}
+
+impl Mul<f64> for Vec3{
+    type Output = Self;
+
+    fn mul(self,other:f64) -> Self{
+        Self{
+            x: self.x * other,
+            y: self.y * other,
+            z: self.z * other,
+        }
+    }
+}
+
+impl MulAssign for Vec3{
+    fn mul_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x * other.x,
+            y: self.y * other.y,
+            z: self.z * other.z,
+        };
+    }
+}
+
+impl Div<f64> for Vec3{
+    type Output = Self;
+
+    fn div(self,other:f64) -> Self{
+        Self{
+            x: self.x / other,
+            y: self.y / other,
+            z: self.z / other,
+        }
+    }
+}
+
+impl DivAssign for Vec3{
+    fn div_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x / other.x,
+            y: self.y / other.y,
+            z: self.z / other.z,
+        };
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
