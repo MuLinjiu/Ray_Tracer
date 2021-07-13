@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign};
+use std::ops::{Add, AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
 
 #[derive(Clone, Debug, PartialEq,Copy)]
 pub struct Vec3 {
@@ -20,6 +20,10 @@ impl Vec3 {
         Self::new(0.0, 0.0, 0.0)
     }
 
+    pub fn zero_() -> Self {
+        Self::new(0.0, 0.0, 1.0)
+    }
+
     pub fn squared_length(&self) -> f64 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
@@ -36,11 +40,15 @@ impl Vec3 {
     pub fn dot(a:Self,b:Self) -> f64{
         (a.x * b.x + a.y * b.y + a.z * b.z) as f64
     }
-    pub fn modlen(self) -> f64{
+    pub fn len(self) -> f64{
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt() as f64
     }
+
+    pub fn len_squared(self) -> f64{
+        (self.x * self.x + self.y * self.y + self.z * self.z) as f64
+    }
     pub fn unit(self) -> Self {
-        let len = self.modlen();
+        let len = self.len();
         Self::new(self.x / len, self.y / len, self.z / len)
     }
     
@@ -163,6 +171,18 @@ impl DivAssign for Vec3{
             y: self.y / other.y,
             z: self.z / other.z,
         };
+    }
+}
+
+impl Neg for Vec3{
+    type Output = Self;
+    
+    fn neg(self) -> Self{
+        Self{
+            x:-self.x,
+            y:-self.y,
+            z:-self.z,
+        }
     }
 }
 #[cfg(test)]

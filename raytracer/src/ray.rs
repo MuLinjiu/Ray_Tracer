@@ -11,9 +11,9 @@ impl Ray{
         Self {orig,dir}
     }
     pub fn zero() -> Self{
-        Self::new(Vec3::zero(),Vec3::zero())
+        Self::new(Vec3::zero_(),Vec3::zero())
     }
     pub fn at(&self,x:f64) -> Vec3{
-        self.orig.clone() + self.dir.clone() * x
+        self.orig + self.dir * x
     }
 }
