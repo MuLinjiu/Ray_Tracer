@@ -1,22 +1,28 @@
+use std::rc::Rc;
+use std::sync::Arc;
+
 #[allow(clippy::float_cmp)]
 
 use crate::vec3::Vec3;
 use crate::ray::Ray;
-#[derive(Clone, Debug, PartialEq,Copy)]
-pub struct hit_record{
+use crate::materia::material;
+#[derive(Clone)]
+pub struct hit_record{ 
     pub p:Vec3,
     pub normal: Vec3,
     pub t: f64,
+    pub mat_ptr:Arc<dyn material>,
     pub front_face:bool,
 }
 
 impl hit_record{
-    pub fn new() -> Self{
+    pub fn new(p_:Vec3,n:Vec3,t_:f64,mat:Arc<dyn material>,f:bool) -> Self{
         Self{
-            p:Vec3::zero(),
-            normal:Vec3::zero_(),
-            t:0.0,
-            front_face:false,
+            p:p_,
+            normal:n,
+            t:t_,
+            mat_ptr:mat,
+            front_face:f,
         }
     }
     pub fn set_face_normal(&mut self,r:&Ray,outward_normal:Vec3){

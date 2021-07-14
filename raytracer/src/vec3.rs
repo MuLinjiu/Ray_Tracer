@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign,Sub,SubAssign,Mul,MulAssign,Div,DivAssign,Neg};
 
+use crate::rtweekend::{random_double, random_double2};
+
 #[derive(Clone, Debug, PartialEq,Copy)]
 pub struct Vec3 {
     pub x: f64,
@@ -31,7 +33,7 @@ impl Vec3 {
         Self::new(a.x * b.x, a.y * b.y, a.z * b.z)
     }
     
-    pub fn crossmul(a:Self, b:Self) -> Self{
+    pub fn cross(a:Self, b:Self) -> Self{
         Self::new(a.y * b.z - b.y * a.z,
             b.x * a.z - a.x * b.z,
             a.x * b.y - b.x * a.y,
@@ -50,6 +52,22 @@ impl Vec3 {
     pub fn unit(self) -> Self {
         let len = self.len();
         Self::new(self.x / len, self.y / len, self.z / len)
+    }
+
+    pub fn random() -> Self{
+        Self{
+            x:random_double(1.0, 100.0),
+            y:random_double(1.0, 100.0),
+            z:random_double(1.0, 100.0),
+        }
+    }
+
+    pub fn random_(min:f64,max:f64) -> Self{
+        Self{
+            x:random_double2(min, max),
+            y:random_double2(min, max),
+            z:random_double2(min, max),
+        }
     }
     
 }
@@ -174,6 +192,35 @@ impl DivAssign for Vec3{
     }
 }
 
+pub fn random_in_unit_sphere() -> Vec3{
+    let a = random_double2(0.0, 2.0 * 3.141592653);
+    let z = random_double2(-1.0, 1.0);
+    let r = (1.0 - z * z).sqrt();
+    Vec3::new(r * a.cos(),r * a.sin(),z)
+}
+
+pub fn random_in_unit_disk() -> Vec3{
+    loop {
+        let p = Vec3::new(random_double2(-1.0, 1.0),random_double2(-1.0, 1.0),0.0);
+        if p.len_squared() >= 1.0{
+            continue;
+        }else{
+            return p;
+        }
+    }
+}
+
+pub fn reflect(v:Vec3,n:Vec3) -> Vec3{
+    v - n * Vec3::dot(v,n) * 2.0
+}
+
+pub fn refract(uv:Vec3,n:Vec3,etai_over_etat:f64) -> Vec3{
+    let cos_theta = Vec3::dot(-uv, n);
+    let r_out_perp = (uv + n * cos_theta) * etai_over_etat;
+    let r_out_parallel = n * (- ((1.0 - r_out_perp.len_squared()).abs()).sqrt());
+    return r_out_parallel + r_out_perp;
+}
+
 impl Neg for Vec3{
     type Output = Self;
     
@@ -185,6 +232,8 @@ impl Neg for Vec3{
         }
     }
 }
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

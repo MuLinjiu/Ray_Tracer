@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use crate::{Ray, hittable::{Hittable, hit_record}};
 
 #[allow(clippy::float_cmp)]
 pub struct Hittable_list{
-    objects:Vec<Box<dyn Hittable>>,
+    objects:Vec<Arc<dyn Hittable>>,
 }
 
 impl Hittable_list{
@@ -11,7 +13,7 @@ impl Hittable_list{
                 objects : Vec::new(),
             }
     }
-    pub fn add(&mut self,object:Box<dyn Hittable>){
+    pub fn add(&mut self,object:Arc<dyn Hittable>){
         &self.objects.push(object);
     }
 }
@@ -24,8 +26,9 @@ impl Hittable for Hittable_list{
         {
             let t = object.hit(r, t_min, closest_so_far);
             if let Some(rec_) = t{
+                let t = rec_.t.clone();
                 rec = Some(rec_);
-                closest_so_far = rec_.t;
+                closest_so_far = t;
             }
         }
         rec
