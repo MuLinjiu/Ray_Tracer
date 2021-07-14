@@ -1,44 +1,42 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
-#[allow(clippy::float_cmp)]
-
-use crate::vec3::Vec3;
-use crate::ray::Ray;
 use crate::materia::material;
+use crate::ray::Ray;
+use crate::vec3::Vec3;
 #[derive(Clone)]
-pub struct hit_record{ 
-    pub p:Vec3,
+pub struct hit_record {
+    pub p: Vec3,
     pub normal: Vec3,
     pub t: f64,
-    pub mat_ptr:Arc<dyn material>,
-    pub front_face:bool,
+    pub mat_ptr: Arc<dyn material>,
+    pub front_face: bool,
 }
 
-impl hit_record{
-    pub fn new(p_:Vec3,n:Vec3,t_:f64,mat:Arc<dyn material>,f:bool) -> Self{
-        Self{
-            p:p_,
-            normal:n,
-            t:t_,
-            mat_ptr:mat,
-            front_face:f,
+impl hit_record {
+    pub fn new(p_: Vec3, n: Vec3, t_: f64, mat: Arc<dyn material>, f: bool) -> Self {
+        Self {
+            p: p_,
+            normal: n,
+            t: t_,
+            mat_ptr: mat,
+            front_face: f,
         }
     }
-    pub fn set_face_normal(&mut self,r:&Ray,outward_normal:Vec3){
-        self.front_face = Vec3::dot(r.dir,outward_normal) < 0.0;
-        if self.front_face{
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {
+        self.front_face = Vec3::dot(r.dir, outward_normal) < 0.0;
+        if self.front_face {
             self.normal.x = outward_normal.x;
             self.normal.y = outward_normal.y;
             self.normal.z = outward_normal.z;
-        }else {
+        } else {
             self.normal.x = -outward_normal.x;
             self.normal.y = -outward_normal.y;
             self.normal.z = -outward_normal.z;
+        }
     }
 }
-}
 
-pub trait Hittable{
-    fn hit(&self,r:&Ray,t_min:f64,t_max:f64) -> Option<hit_record>;
+pub trait Hittable {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record>;
 }
