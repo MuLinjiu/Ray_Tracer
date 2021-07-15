@@ -48,6 +48,7 @@ impl material for metal {
         //scattered = &Ray::new(rec.p, reflected);
         scattered.orig = rec.p;
         scattered.dir = reflected + random_in_unit_sphere() * self.fuzz;
+        scattered.time = r_in.time;
         //attenuation = &self.albedo.clone();
         attenuation.x = self.albedo.x;
         attenuation.y = self.albedo.y;
@@ -80,6 +81,7 @@ impl material for lambertian {
         //scattered = &Ray::new(rec.p, scatter_direction);
         scattered.orig = rec.p;
         scattered.dir = scatter_direction;
+        scattered.time = r_in.time;
         //attenuation = &self.albedo;
         attenuation.x = self.albedo.x;
         attenuation.y = self.albedo.y;
@@ -133,6 +135,7 @@ impl material for dielectric {
             let reflected = reflect(unit_direction, rec.normal);
             scattered.orig = rec.p;
             scattered.dir = reflected;
+            scattered.time = r_in.time;
             return true;
         }
         let reflect_prob = schlick(cos_theta, etai_over_etat);
@@ -141,6 +144,7 @@ impl material for dielectric {
             let reflected = reflect(unit_direction, rec.normal);
             scattered.orig = rec.p;
             scattered.dir = reflected;
+            scattered.time = r_in.time;
             return true;
         }
         //let cos_theta = Ord::min(Vec3::dot(-unit_direction, rec.normal),1.0);
@@ -148,6 +152,7 @@ impl material for dielectric {
         //scattered = Ray::new(rec.p,refracted);
         scattered.orig = rec.p;
         scattered.dir = refracted;
+        scattered.time = r_in.time;
         return true;
     }
 }

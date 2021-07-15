@@ -14,6 +14,7 @@ use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
 use rand::{random, Rng};
 use rtweekend::random_double2;
+use sphere::moving_sphere;
 use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
 use vec3::random_in_unit_sphere;
 
@@ -55,7 +56,8 @@ pub fn random_scene(world: &mut Hittable_list) {
                         albedo1.z * albedo2.z,
                     );
                     let sphere_material = Arc::new(lambertian::new(albedo));
-                    world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
+                    let center2 = center + Vec3::new(0.0,random_double2(0.0, 0.5),0.0);
+                    world.add(Arc::new(moving_sphere::new(center, center2,0.0,1.0,0.2, sphere_material)));
                 } else if choose_mat < 0.95 {
                     let albedo = Vec3::random_(0.5, 1.0);
                     let fuzz = random_double2(0.0, 0.5);
@@ -97,7 +99,7 @@ pub fn color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
     }
     let t = world.hit(&r, 0.001, INFINITY as f64);
     if let Some(rec_) = t {
-        let mut scattered = Ray::new(Vec3::zero(), Vec3::zero());
+        let mut scattered = Ray::new(Vec3::zero(), Vec3::zero(),0.0);
         let mut attenuation = Vec3::zero();
         if rec_
             .mat_ptr
@@ -123,8 +125,8 @@ pub fn color(r: &Ray, world: &dyn Hittable, depth: i32) -> Vec3 {
 
 fn main() {
     const MAX_DEPTH: i32 = 50;
-    const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: i32 = 1200;
+    const ASPECT_RATIO: f64 = 16.0 / 9.0;
+    const IMAGE_WIDTH: i32 = 400;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
     const SAMPLES_PER_PIXEL: i32 = 100;
 
@@ -156,6 +158,8 @@ fn main() {
         ASPECT_RATIO,
         aperture,
         dist_to_focus,
+        0.0,
+        1.0,
     );
     let mut img: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
     let bar = ProgressBar::new(IMAGE_WIDTH as u64);
