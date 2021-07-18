@@ -23,7 +23,7 @@ use texture::checker_texture;
 use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
 use vec3::random_in_unit_sphere;
 
-use crate::{camera::Camera, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::noise_texture};
+use crate::{camera::Camera, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::{image_texture, noise_texture}};
 pub use ray::Ray;
 pub use vec3::Vec3;
 
@@ -133,7 +133,7 @@ fn main() {
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
     const IMAGE_WIDTH: i32 = 400;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 100;
+    const SAMPLES_PER_PIXEL: i32 = 1000;
     
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -143,7 +143,7 @@ fn main() {
     let mut aperture = 0.1;
     let mut world: Hittable_list = Hittable_list::new();
     let mut vfov = 20.0;
-    let x = 2;
+    let x = 3;
     if x== 0{
         random_scene(&mut world);
     }else if x == 1{
@@ -164,6 +164,13 @@ fn main() {
         world.add(Arc::new(Sphere::new(Vec3::new(0.0,-1000.0,0.0), 1000.0, Arc::new(lambertian::new1(pertext.clone())))));
         world.add(Arc::new(Sphere::new(Vec3::new(0.0,2.0,0.0), 2.0, Arc::new(lambertian::new1(pertext)))));
         lookfrom.x = 13.0;
+    }else if x == 3{
+        lookfrom.x = 13.0;
+        let earth_texture = Arc::new(image_texture::new("earthmap.jpg"));
+        //let earth_texture = Arc::new(image_texture::new("tjm.jpg"));
+        let erath_surface = Arc::new(lambertian::new1(earth_texture));
+        let golbe = Arc::new(Sphere::new(Vec3::zero(),2.0,erath_surface));
+        world.add(golbe);
     }
     //random_scene(&mut world);
 
