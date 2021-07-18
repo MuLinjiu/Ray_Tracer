@@ -10,6 +10,7 @@ mod vec3;
 mod aabb;
 mod bvh;
 mod texture;
+mod perlin;
 
 use camera::clamp;
 use hittable::hit_record;
@@ -22,14 +23,7 @@ use texture::checker_texture;
 use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
 use vec3::random_in_unit_sphere;
 
-use crate::{
-    camera::Camera,
-    hittable::Hittable,
-    hittable_list::Hittable_list,
-    materia::{dielectric, lambertian, metal},
-    rtweekend::random_double,
-    sphere::Sphere,
-};
+use crate::{camera::Camera, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::noise_texture};
 pub use ray::Ray;
 pub use vec3::Vec3;
 
@@ -140,9 +134,51 @@ fn main() {
     const IMAGE_WIDTH: i32 = 400;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
     const SAMPLES_PER_PIXEL: i32 = 100;
-
+    
+    let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
+    //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
+    let mut lookat = Vec3::new(0.0, 0.0, 0.0);
+    let mut vup = Vec3::new(0.0, 1.0, 0.0);
+    let mut dist_to_focus = 10.0;
+    let mut aperture = 0.1;
     let mut world: Hittable_list = Hittable_list::new();
-    random_scene(&mut world);
+    let mut vfov = 20.0;
+    let x = 2;
+    if x== 0{
+        random_scene(&mut world);
+    }else if x == 1{
+        let checker =  Arc::new(checker_texture::new(Vec3::new(0.2,0.3,0.1),Vec3::new(0.9,0.9,0.9)));
+        aperture = 0.0;
+        world.add(Arc::new(Sphere::new(
+            Vec3::new(0.0, -10.0, 0.0),
+            10.0,
+            Arc::new(lambertian::new1(checker.clone())),
+        )));
+        world.add(Arc::new(Sphere::new(
+            Vec3::new(0.0, 10.0, 0.0),
+            10.0,
+            Arc::new(lambertian::new1(checker)),
+        )));
+    }else if x == 2{
+        let pertext = Arc::new(noise_texture::new1(4.0));
+        world.add(Arc::new(Sphere::new(Vec3::new(0.0,-1000.0,0.0), 1000.0, Arc::new(lambertian::new1(pertext.clone())))));
+        world.add(Arc::new(Sphere::new(Vec3::new(0.0,2.0,0.0), 2.0, Arc::new(lambertian::new1(pertext)))));
+        lookfrom.x = 13.0;
+    }
+    //random_scene(&mut world);
+
+    // let checker =  Arc::new(checker_texture::new(Vec3::new(0.2,0.3,0.1),Vec3::new(0.9,0.9,0.9)));
+    // aperture = 0.0;
+    // world.add(Arc::new(Sphere::new(
+    //     Vec3::new(0.0, -10.0, 0.0),
+    //     10.0,
+    //     Arc::new(lambertian::new1(checker.clone())),
+    // )));
+    // world.add(Arc::new(Sphere::new(
+    //     Vec3::new(0.0, 10.0, 0.0),
+    //     10.0,
+    //     Arc::new(lambertian::new1(checker)),
+    // )));
     // let material_ground = Arc::new(Sphere::new(Vec3::new(0.0,-100.5,-1.0),100.0,Arc::new(lambertian::new(Vec3::new(0.8,0.8,0.0)))));
     // let material_center = Arc::new(Sphere::new(Vec3::new(0.0,0.0,-1.0),0.5,Arc::new(lambertian::new(Vec3::new(0.1,0.2,0.5)))));
     // let material_left = Arc::new(Sphere::new(Vec3::new(-1.0,0.0,-1.0),0.5,Arc::new(dielectric::new(1.5))));
@@ -155,18 +191,13 @@ fn main() {
     // world.add(material_left2);
     // world.add(material_right);
 
-    let lookfrom = Vec3::new(12.0, 2.0, 3.0);
-    //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
-    let lookat = Vec3::new(0.0, 0.0, 0.0);
-    let vup = Vec3::new(0.0, 1.0, 0.0);
-    let dist_to_focus = 10.0;
-    let aperture = 0.1;
+    
 
     let cam = Camera::new(
         lookfrom,
         lookat,
         vup,
-        20.0,
+        vfov,
         ASPECT_RATIO,
         aperture,
         dist_to_focus,

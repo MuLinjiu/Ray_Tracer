@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use crate::Vec3;
+use imageproc::noise;
+
+use crate::{Vec3, perlin::Perlin};
 
 pub trait Texture{
     fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3;
@@ -46,7 +48,7 @@ impl Texture for BaseColor {
     }
 }
 
-
+#[derive(Clone, )]
 pub  struct checker_texture{
     odd:Arc<dyn Texture>,
     even:Arc<dyn Texture>,
@@ -69,5 +71,33 @@ impl Texture for checker_texture{
         }else {
             return self.even.value(u, v, p);
         }
+    }
+}
+
+pub struct noise_texture{
+    pub noise:Perlin,
+    pub scare:f64,
+}
+
+impl noise_texture{
+    pub fn new() -> Self{
+        let n = Perlin::new();
+        Self{
+            noise:n,
+            scare:0.0,
+        }
+    }
+    pub fn new1(sc:f64) -> Self{
+        let n = Perlin::new();
+        Self{
+            noise:n,
+            scare:sc,
+        }
+    }
+}
+
+impl Texture for noise_texture{
+    fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
+        return Vec3::new(1.0,1.0,1.0) * 0.5 * (1.0 + (10.0 * self.noise.turb(*p , 7) + self.scare * p.z).sin());
     }
 }
