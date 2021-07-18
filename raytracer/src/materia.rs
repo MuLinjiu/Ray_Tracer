@@ -1,11 +1,13 @@
 use std::cmp::min;
 
+use std::sync::Arc;
 use std::time::Duration;
 
 use crate::hittable::hit_record;
 
 use crate::ray::Ray;
 use crate::rtweekend::random_double;
+use crate::texture::{Texture, solid_color};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
 
 pub trait material {
@@ -58,13 +60,18 @@ impl material for metal {
 }
 
 pub struct lambertian {
-    albedo: Vec3,
+    albedo: Arc<dyn Texture>,
 }
 
 impl lambertian {
     pub fn new(a: Vec3) -> Self {
         Self {
-            albedo: Vec3::new(a.x, a.y, a.z),
+            albedo: Arc::new(solid_color::new(a)),
+        }
+    }
+    pub fn new1(a:Arc<dyn Texture>) -> Self{
+        Self{
+            albedo:a,
         }
     }
 }
@@ -83,9 +90,12 @@ impl material for lambertian {
         scattered.dir = scatter_direction;
         scattered.time = r_in.time;
         //attenuation = &self.albedo;
-        attenuation.x = self.albedo.x;
-        attenuation.y = self.albedo.y;
-        attenuation.z = self.albedo.z;
+        // attenuation.x = self.albedo.x;
+        // attenuation.y = self.albedo.y;
+        // attenuation.z = self.albedo.z;
+        attenuation.x = self.albedo.value(rec.u, rec.v, &rec.p).x;
+        attenuation.y = self.albedo.value(rec.u, rec.v, &rec.p).y;
+        attenuation.z = self.albedo.value(rec.u, rec.v, &rec.p).z;
         return true;
     }
 }

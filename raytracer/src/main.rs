@@ -7,6 +7,9 @@ mod rtweekend;
 mod sphere;
 #[allow(clippy::float_cmp)]
 mod vec3;
+mod aabb;
+mod bvh;
+mod texture;
 
 use camera::clamp;
 use hittable::hit_record;
@@ -15,6 +18,7 @@ use indicatif::ProgressBar;
 use rand::{random, Rng};
 use rtweekend::random_double2;
 use sphere::moving_sphere;
+use texture::checker_texture;
 use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
 use vec3::random_in_unit_sphere;
 
@@ -31,11 +35,18 @@ pub use vec3::Vec3;
 
 pub fn random_scene(world: &mut Hittable_list) {
     //let mut world:Hittable_list = Hittable_list::new();
-    let ground_material = Arc::new(lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    // let ground_material = Arc::new(lambertian::new(Vec3::new(0.5, 0.5, 0.5)));
+    // world.add(Arc::new(Sphere::new(
+    //     Vec3::new(0.0, -1000.0, 0.0),
+    //     1000.0,
+    //     ground_material,
+    // )));
+
+    let checker =  Arc::new(checker_texture::new(Vec3::new(0.2,0.3,0.1),Vec3::new(0.9,0.9,0.9)));
     world.add(Arc::new(Sphere::new(
         Vec3::new(0.0, -1000.0, 0.0),
         1000.0,
-        ground_material,
+        Arc::new(lambertian::new1(checker)),
     )));
 
     for a in -11..11 {
@@ -145,6 +156,7 @@ fn main() {
     // world.add(material_right);
 
     let lookfrom = Vec3::new(12.0, 2.0, 3.0);
+    //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
     let lookat = Vec3::new(0.0, 0.0, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;

@@ -1,5 +1,7 @@
+use std::f64::consts::PI;
 use std::{rc::Rc, sync::Arc};
 
+use crate::aabb::AABB;
 use crate::vec3::Vec3;
 use crate::{
     hittable::{hit_record, Hittable},
@@ -20,6 +22,14 @@ impl Sphere {
             radius,
             mat_ptr,
         }
+    }
+    fn get_sphere_uv(p: Vec3, u: &mut f64, v: &mut f64) {
+        let theta = (-p.y).acos();
+        let temptheta =  (-p.z)/p.x;
+        let mut phi = (temptheta).atan();
+        phi=phi+PI;
+        *u =   *&mut (phi / (2.0 * PI));
+        *v =   *&mut (theta / PI);
     }
 }
 
@@ -45,6 +55,7 @@ impl Hittable for Sphere {
                 rec.p = r.at(t);
                 let outward_normal = (rec.p - self.center) / self.radius;
                 rec.set_face_normal(r, outward_normal);
+                Sphere::get_sphere_uv(outward_normal,&mut rec.u,&mut rec.v);
                 rec.mat_ptr = self.mat_ptr.clone();
                 return Some(rec);
             }
@@ -54,11 +65,19 @@ impl Hittable for Sphere {
                 rec.p = r.at(t);
                 let outward_normal = (rec.p - self.center) / self.radius;
                 rec.set_face_normal(r, outward_normal);
+                Sphere::get_sphere_uv(outward_normal,&mut rec.u,&mut rec.v);
                 rec.mat_ptr = self.mat_ptr.clone();
                 return Some(rec);
             }
         }
         return None;
+    }
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+        let output = AABB::new(
+             self.center - Vec3::new(self.radius, self.radius, self.radius),
+            self.center + Vec3::new(self.radius, self.radius, self.radius),
+        );
+        return Some(output);
     }
 }
 
@@ -84,6 +103,8 @@ impl moving_sphere{
         }
 
     }
+
+
 
     pub fn center(&self,time:f64) -> Vec3{
         return self.center0 + (self.center1 - self.center0) * (time - self.time0) / (self.time1 - self.time0);
@@ -126,5 +147,18 @@ impl Hittable for moving_sphere{
             }
         }
         return None;
+    }
+    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+        let box0 = AABB::new(
+            self.center(time0) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center(time0) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+        let box1 = AABB::new(
+            self.center(time1) - Vec3::new(self.radius, self.radius, self.radius),
+            self.center(time1) + Vec3::new(self.radius, self.radius, self.radius),
+        );
+        let output_box = AABB::surrounding_box(box0, box1);
+        return Some(output_box);
+        //改成option
     }
 }
