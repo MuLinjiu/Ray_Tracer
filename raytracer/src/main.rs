@@ -15,6 +15,7 @@ mod constant_medium;
 #[allow(clippy::float_cmp)]
 mod vec3;
 
+use bvh::BVHNODE;
 use camera::clamp;
 use hittable::hit_record;
 use image::{ImageBuffer, RgbImage};
@@ -111,6 +112,59 @@ pub fn random_scene(world: &mut Hittable_list) {
     //return world;
 }
 
+pub fn final_scene(world: &mut Hittable_list){
+    let mut boxes1 = Hittable_list::new();
+    let ground = Arc::new(lambertian::new(Vec3::new(0.48,0.83,0.53)));
+    let boxes_per_side = 20;
+
+    for i in 0..boxes_per_side{
+        for j in 0..boxes_per_side{
+            let w = 100.0;
+            let x0 = -1000.0 + i as f64 * w;
+            let z0 = -1000.0 + j as f64 * w;
+            let y0 = 0.0;
+            let x1 = x0 + w;
+            let y1 = random_double2(1.0, 101.0);
+            let z1 = z0 + w;
+
+            world.add(Arc::new(Box_::new(Vec3::new(x0,y0,z0),Vec3::new(x1,y1,z1),ground.clone())));
+
+        }
+    }
+    //world.add(Arc::new(BVHNODE::new(boxes1.objects.clone(),boxes1.objects.len(),0.0,1.0)));
+
+    let light = Arc::new(diffuse_light::new1(Vec3::new(7.0,7.0,7.0)));
+    world.add(Arc::new(xz_rect::new(123.0,423.0,147.0,412.0,554.0,light)));
+
+    let center1 = Vec3::new(400.0,400.0,200.0);
+    let center2 = center1 + Vec3::new(30.0,0.0,0.0);
+    let moving_sphere_material = Arc::new(lambertian::new(Vec3::new(0.7,0.3,0.1)));
+    world.add(Arc::new(moving_sphere::new(center1,center2,0.0,1.0,50.0,moving_sphere_material)));
+
+    world.add(Arc::new(Sphere::new(Vec3::new(260.0,150.0,45.0),50.0,Arc::new(dielectric::new(1.5)))));
+    world.add(Arc::new(Sphere::new(Vec3::new(0.0,150.0,145.0),50.0,Arc::new(metal::new(Vec3::new(0.8,0.8,0.9),1.0)))));
+
+    let boundary = Arc::new(Sphere::new(Vec3::new(360.0,150.0,145.0),70.0,Arc::new(dielectric::new(1.5))));
+    world.add(boundary.clone());
+    world.add(Arc::new(Constant_medium::new1(boundary.clone(),0.2,Vec3::new(0.2,0.4,0.9))));
+    let boundary = Arc::new(Sphere::new(Vec3::zero(),5000.0,Arc::new(dielectric::new(1.5))));
+    world.add(Arc::new(Constant_medium::new1(boundary,0.0001,Vec3::ones())));
+
+    let emat = Arc::new(lambertian::new1(Arc::new(image_texture::new("earthmap.jpg"))));
+    world.add(Arc::new(Sphere::new(Vec3::new(400.0,200.0,400.0),100.0,emat)));
+
+    let pertext = Arc::new(noise_texture::new1(0.1));
+    world.add(Arc::new(Sphere::new(Vec3::new(220.0,280.0,300.0),80.0,Arc::new(lambertian::new1(pertext)))));
+
+    let white = Arc::new(lambertian::new(Vec3::new(0.73,0.73,0.73)));
+    let ns = 1000;
+    for j in 0..ns{
+        world.add(Arc::new(Sphere::new(Vec3::new(random_double2(0.0,165.0),random_double2(0.0,165.0),random_double2(0.0,165.0)),10.0,white.clone())));
+    }
+
+}
+
+
 pub fn color(r: &Ray, background:&Vec3,world: &dyn Hittable, depth: i32) -> Vec3 {
     if depth <= 0 {
         return Vec3::zero();
@@ -154,9 +208,11 @@ fn main() {
     const ASPECT_RATIO: f64 = 1.0;
     //const IMAGE_WIDTH: i32 = 400;
     //5
-    const IMAGE_WIDTH: i32 = 600;
+    //const IMAGE_WIDTH: i32 = 600;
+    //6
+    const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 200;
+    const SAMPLES_PER_PIXEL: i32 = 100;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -167,7 +223,7 @@ fn main() {
     let mut world: Hittable_list = Hittable_list::new();
     let mut vfov = 20.0;
     let mut background = Vec3::zero();
-    let x = 5;
+    let x = 6;
     if x == 0 {
         random_scene(&mut world);
         background = Vec3::new(0.7,0.8,1.0);
@@ -266,6 +322,12 @@ fn main() {
         lookat.y = 278.0;
         lookat.z = 0.0;
         vfov = 40.0;
+    }else if x == 6{
+        final_scene(&mut world);
+        lookfrom = Vec3::new(478.0, 278.0, -600.0);
+        lookat = Vec3::new(278.0,278.0,0.0);
+        vfov = 40.0;
+        background = Vec3::zero();
     }
     //random_scene(&mut world);
 

@@ -9,7 +9,7 @@ use crate::{
 
 #[allow(clippy::float_cmp)]
 pub struct Hittable_list {
-    objects: Vec<Arc<dyn Hittable>>,
+    pub objects: Vec<Arc<dyn Hittable>>,
 }
 
 impl Hittable_list {
