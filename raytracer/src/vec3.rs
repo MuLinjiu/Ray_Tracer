@@ -13,12 +13,12 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn get(&self,axis:i32) -> f64{
+    pub fn get(&self, axis: i32) -> f64 {
         if axis == 0 {
             return self.x;
-        }else if axis == 1{
+        } else if axis == 1 {
             return self.y;
-        }else {
+        } else {
             return self.z;
         }
     }

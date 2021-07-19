@@ -19,7 +19,7 @@ pub trait material {
         scattered: &mut Ray,
     ) -> bool;
 
-    fn emitted(&self,u:f64,v:f64,p:&Vec3) -> Vec3;
+    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3;
 }
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct metal {
@@ -41,7 +41,7 @@ impl metal {
 }
 
 impl material for metal {
-    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         return Vec3::zero();
     }
     fn scatter(
@@ -80,7 +80,7 @@ impl lambertian {
 }
 
 impl material for lambertian {
-    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -122,7 +122,7 @@ impl dielectric {
 }
 
 impl material for dielectric {
-    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -176,30 +176,33 @@ impl material for dielectric {
     }
 }
 
-pub struct diffuse_light{
-    emit:Arc<dyn Texture>,
+pub struct diffuse_light {
+    emit: Arc<dyn Texture>,
 }
 
-impl diffuse_light{
-    pub fn new(a:Arc<dyn Texture>) -> Self{
-        Self{
-            emit:a.clone(),
-        }
+impl diffuse_light {
+    pub fn new(a: Arc<dyn Texture>) -> Self {
+        Self { emit: a.clone() }
     }
 
-    pub fn new1(c:Vec3) -> Self{
-        Self{
-            emit:Arc::new(solid_color::new(c)),
+    pub fn new1(c: Vec3) -> Self {
+        Self {
+            emit: Arc::new(solid_color::new(c)),
         }
     }
-
 }
 
-impl material for diffuse_light{
-    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+impl material for diffuse_light {
+    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         return self.emit.value(u, v, p);
     }
-    fn scatter(&self, r_in: &Ray, rec: &hit_record, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
+    fn scatter(
+        &self,
+        r_in: &Ray,
+        rec: &hit_record,
+        attenuation: &mut Vec3,
+        scattered: &mut Ray,
+    ) -> bool {
         return false;
     }
 }
