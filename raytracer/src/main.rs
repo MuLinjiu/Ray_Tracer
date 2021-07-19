@@ -11,6 +11,7 @@ mod sphere;
 mod texture;
 mod aarec;
 mod box_;
+mod constant_medium;
 #[allow(clippy::float_cmp)]
 mod vec3;
 
@@ -25,7 +26,7 @@ use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
 use texture::checker_texture;
 use vec3::random_in_unit_sphere;
 
-use crate::{aarec::{rotate_y, translate, xy_rect, xz_rect, yz_rect}, box_::Box_, camera::Camera, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, diffuse_light, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::{image_texture, noise_texture}};
+use crate::{aarec::{rotate_y, translate, xy_rect, xz_rect, yz_rect}, box_::Box_, camera::Camera, constant_medium::Constant_medium, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, diffuse_light, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::{image_texture, noise_texture}};
 pub use ray::Ray;
 pub use vec3::Vec3;
 
@@ -249,12 +250,12 @@ fn main() {
         let box1 = Arc::new(Box_::new(Vec3::zero(),Vec3::new(165.0,330.0,165.0),white.clone()));
         let box1_ = Arc::new(rotate_y::new(box1,15.0));
         let box1__ = Arc::new(translate::new(box1_,Vec3::new(265.0,0.0,295.0)));
-        world.add(box1__);
+        world.add(Arc::new(Constant_medium::new1(box1__,0.01,Vec3::zero())));
 
         let box2 = Arc::new(Box_::new(Vec3::zero(),Vec3::new(165.0,165.0,165.0),white.clone()));
         let box2_ = Arc::new(rotate_y::new(box2,-18.0));
         let box2__ = Arc::new(translate::new(box2_,Vec3::new(130.0,0.0,65.0)));
-        world.add(box2__);
+        world.add(Arc::new(Constant_medium::new1(box2__,0.01,Vec3::ones())));
 
         background = Vec3::zero();
         lookfrom.x = 278.0;
