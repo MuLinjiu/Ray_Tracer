@@ -1,6 +1,11 @@
 use std::sync::Arc;
 
-use crate::{Ray, aabb::AABB, hittable::{hit_record, Hittable},vec3::Vec3};
+use crate::{
+    aabb::AABB,
+    hittable::{hit_record, Hittable},
+    vec3::Vec3,
+    Ray,
+};
 
 #[allow(clippy::float_cmp)]
 pub struct Hittable_list {
@@ -34,8 +39,8 @@ impl Hittable for Hittable_list {
     }
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
-        if self.objects.is_empty() { 
-            return None; 
+        if self.objects.is_empty() {
+            return None;
         }
         let mut output = AABB::new(Vec3::zero(), Vec3::zero());
         let tempbox = AABB::new(Vec3::zero(), Vec3::zero());
@@ -48,7 +53,9 @@ impl Hittable for Hittable_list {
                     output = AABB::surrounding_box(output, tempbox);
                 }
                 first_box = false;
-            } else { return None; }
+            } else {
+                return None;
+            }
         }
         Some(output)
     }

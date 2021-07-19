@@ -7,6 +7,6 @@ pub struct BVHNODE {
     pub right: Arc<dyn Hittable>,
     pub box1: AABB,
 }
-impl BVHNODE{
-    // to do 
+impl BVHNODE {
+    // to do
 }

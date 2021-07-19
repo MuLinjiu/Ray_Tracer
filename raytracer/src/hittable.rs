@@ -13,8 +13,8 @@ pub struct hit_record {
     pub t: f64,
     pub mat_ptr: Arc<dyn material>,
     pub front_face: bool,
-    pub u:f64,
-    pub v:f64,
+    pub u: f64,
+    pub v: f64,
 }
 
 impl hit_record {
@@ -25,8 +25,8 @@ impl hit_record {
             t: t_,
             mat_ptr: mat,
             front_face: f,
-            u:0.0,
-            v:0.0,
+            u: 0.0,
+            v: 0.0,
         }
     }
     pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vec3) {

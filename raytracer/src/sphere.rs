@@ -25,11 +25,11 @@ impl Sphere {
     }
     fn get_sphere_uv(p: Vec3, u: &mut f64, v: &mut f64) {
         let theta = (-p.y).acos();
-        let temptheta =  (-p.z)/p.x;
+        let temptheta = (-p.z) / p.x;
         let mut phi = (temptheta).atan();
-        phi=phi+PI;
-        *u =   *&mut (phi / (2.0 * PI));
-        *v =   *&mut (theta / PI);
+        phi = phi + PI;
+        *u = *&mut (phi / (2.0 * PI));
+        *v = *&mut (theta / PI);
     }
 }
 
@@ -55,7 +55,7 @@ impl Hittable for Sphere {
                 rec.p = r.at(t);
                 let outward_normal = (rec.p - self.center) / self.radius;
                 rec.set_face_normal(r, outward_normal);
-                Sphere::get_sphere_uv(outward_normal,&mut rec.u,&mut rec.v);
+                Sphere::get_sphere_uv(outward_normal, &mut rec.u, &mut rec.v);
                 rec.mat_ptr = self.mat_ptr.clone();
                 return Some(rec);
             }
@@ -65,7 +65,7 @@ impl Hittable for Sphere {
                 rec.p = r.at(t);
                 let outward_normal = (rec.p - self.center) / self.radius;
                 rec.set_face_normal(r, outward_normal);
-                Sphere::get_sphere_uv(outward_normal,&mut rec.u,&mut rec.v);
+                Sphere::get_sphere_uv(outward_normal, &mut rec.u, &mut rec.v);
                 rec.mat_ptr = self.mat_ptr.clone();
                 return Some(rec);
             }
@@ -74,44 +74,48 @@ impl Hittable for Sphere {
     }
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
         let output = AABB::new(
-             self.center - Vec3::new(self.radius, self.radius, self.radius),
+            self.center - Vec3::new(self.radius, self.radius, self.radius),
             self.center + Vec3::new(self.radius, self.radius, self.radius),
         );
         return Some(output);
     }
 }
 
-pub struct moving_sphere{
-    center0:Vec3,
-    center1:Vec3,
-    time0:f64,
-    time1:f64,
-    radius:f64,
-    mat_ptr:Arc<material>,
+pub struct moving_sphere {
+    center0: Vec3,
+    center1: Vec3,
+    time0: f64,
+    time1: f64,
+    radius: f64,
+    mat_ptr: Arc<material>,
 }
 
-impl moving_sphere{
-    pub fn new(cen0:Vec3,cen1:Vec3,_time0:f64,_time1:f64,r:f64,m:Arc<dyn material>) -> Self{
-        
-        Self{
-            center0:Vec3::new(cen0.x,cen0.y,cen0.z),
-            center1:Vec3::new(cen1.x,cen1.y,cen1.z),
-            time0:_time0,
-            time1:_time1,
-            radius:r,
-            mat_ptr:m,
+impl moving_sphere {
+    pub fn new(
+        cen0: Vec3,
+        cen1: Vec3,
+        _time0: f64,
+        _time1: f64,
+        r: f64,
+        m: Arc<dyn material>,
+    ) -> Self {
+        Self {
+            center0: Vec3::new(cen0.x, cen0.y, cen0.z),
+            center1: Vec3::new(cen1.x, cen1.y, cen1.z),
+            time0: _time0,
+            time1: _time1,
+            radius: r,
+            mat_ptr: m,
         }
-
     }
 
-
-
-    pub fn center(&self,time:f64) -> Vec3{
-        return self.center0 + (self.center1 - self.center0) * (time - self.time0) / (self.time1 - self.time0);
+    pub fn center(&self, time: f64) -> Vec3 {
+        return self.center0
+            + (self.center1 - self.center0) * (time - self.time0) / (self.time1 - self.time0);
     }
 }
 
-impl Hittable for moving_sphere{
+impl Hittable for moving_sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
         let mut rec = hit_record::new(
             Vec3::zero(),

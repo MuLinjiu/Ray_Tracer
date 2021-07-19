@@ -7,7 +7,7 @@ use crate::hittable::hit_record;
 
 use crate::ray::Ray;
 use crate::rtweekend::random_double;
-use crate::texture::{Texture, solid_color};
+use crate::texture::{solid_color, Texture};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
 
 pub trait material {
@@ -18,6 +18,8 @@ pub trait material {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool;
+
+    fn emitted(&self,u:f64,v:f64,p:&Vec3) -> Vec3;
 }
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct metal {
@@ -39,6 +41,9 @@ impl metal {
 }
 
 impl material for metal {
+    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+        return Vec3::zero();
+    }
     fn scatter(
         &self,
         r_in: &Ray,
@@ -69,14 +74,15 @@ impl lambertian {
             albedo: Arc::new(solid_color::new(a)),
         }
     }
-    pub fn new1(a:Arc<dyn Texture>) -> Self{
-        Self{
-            albedo:a,
-        }
+    pub fn new1(a: Arc<dyn Texture>) -> Self {
+        Self { albedo: a }
     }
 }
 
 impl material for lambertian {
+    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+        Vec3::zero()
+    }
     fn scatter(
         &self,
         r_in: &Ray,
@@ -116,6 +122,9 @@ impl dielectric {
 }
 
 impl material for dielectric {
+    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+        Vec3::zero()
+    }
     fn scatter(
         &self,
         r_in: &Ray,
@@ -164,5 +173,33 @@ impl material for dielectric {
         scattered.dir = refracted;
         scattered.time = r_in.time;
         return true;
+    }
+}
+
+pub struct diffuse_light{
+    emit:Arc<dyn Texture>,
+}
+
+impl diffuse_light{
+    pub fn new(a:Arc<dyn Texture>) -> Self{
+        Self{
+            emit:a.clone(),
+        }
+    }
+
+    pub fn new1(c:Vec3) -> Self{
+        Self{
+            emit:Arc::new(solid_color::new(c)),
+        }
+    }
+
+}
+
+impl material for diffuse_light{
+    fn emitted(&self, u:f64, v:f64, p:&Vec3) -> Vec3 {
+        return self.emit.value(u, v, p);
+    }
+    fn scatter(&self, r_in: &Ray, rec: &hit_record, attenuation: &mut Vec3, scattered: &mut Ray) -> bool {
+        return false;
     }
 }
