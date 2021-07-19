@@ -155,7 +155,7 @@ fn main() {
     //5
     const IMAGE_WIDTH: i32 = 600;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 10;
+    const SAMPLES_PER_PIXEL: i32 = 200;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
