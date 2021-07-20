@@ -2,7 +2,7 @@
 /shelf/
 /workspace.xml
 # Datasource local storage ignored files
-/dataSources/
+/../../../../../../../:\HXL\FIRST(2)\programming\Ray_Tracer\raytracer\.idea/dataSources/
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/

@@ -1,4 +1,3 @@
-
 use std::{cmp::Ordering, sync::Arc};
 
 use crate::{
@@ -34,14 +33,19 @@ impl Hittable for BVHNODE {
         None
     }
     fn bounding_box(&self, _t0: f64, _t1: f64) -> Option<AABB> {
-        
         Some(self.box1.clone())
     }
 }
 
 impl BVHNODE {
-    pub fn new(src_objects: & Vec<Arc<dyn Hittable>>, start:usize,end:usize, time0: f64, time1: f64) -> Self {
-        let mut objects =  src_objects.clone();
+    pub fn new(
+        src_objects: &Vec<Arc<dyn Hittable>>,
+        start: usize,
+        end: usize,
+        time0: f64,
+        time1: f64,
+    ) -> Self {
+        let mut objects = src_objects.clone();
         let axis = random_int(0, 10000) % 3;
         let left;
         let right;
@@ -51,19 +55,18 @@ impl BVHNODE {
             1 => Self::box_y_compare,
             _ => Self::box_z_compare,
         };
-        if span == 1{
+        if span == 1 {
             left = objects[start].clone();
             right = objects[start].clone();
-        }else if span == 2{
-            if comparetor(&objects[start],&objects[start + 1]) {
+        } else if span == 2 {
+            if comparetor(&objects[start], &objects[start + 1]) {
                 left = objects[start].clone();
                 right = objects[start + 1].clone();
-            }
-            else {
+            } else {
                 left = objects[start + 1].clone();
                 right = objects[start].clone();
             }
-        }else {
+        } else {
             objects.sort_by(|a, b| {
                 let x = a.bounding_box(time0, time1).unwrap().minmum.get(axis);
                 let y = b.bounding_box(time0, time1).unwrap().minmum.get(axis);
@@ -73,7 +76,7 @@ impl BVHNODE {
 
             let mid = start + span / 2;
             left = Arc::new(BVHNODE::new(&objects, start, mid, time0, time1));
-            right = Arc::new(BVHNODE::new(&objects, mid, end, time0, time1)); 
+            right = Arc::new(BVHNODE::new(&objects, mid, end, time0, time1));
         }
 
         // let box0 = left.bounding_box(time0, time1).unwrap();
@@ -81,7 +84,11 @@ impl BVHNODE {
         if let Some(box_left) = left.bounding_box(time0, time1) {
             if let Some(box_right) = right.bounding_box(time0, time1) {
                 let _box = AABB::surrounding_box(box_left, box_right);
-                return Self { left, right, box1:_box };
+                return Self {
+                    left,
+                    right,
+                    box1: _box,
+                };
             }
         }
         panic!("worinima");
