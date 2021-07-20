@@ -87,7 +87,7 @@ pub struct moving_sphere {
     time0: f64,
     time1: f64,
     radius: f64,
-    mat_ptr: Arc<material>,
+    mat_ptr: Arc<dyn material>,
 }
 
 impl moving_sphere {

@@ -8,6 +8,7 @@ use crate::{
 };
 
 #[allow(clippy::float_cmp)]
+#[derive(Clone)]
 pub struct Hittable_list {
     pub objects: Vec<Arc<dyn Hittable>>,
 }

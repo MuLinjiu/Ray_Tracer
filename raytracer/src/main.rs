@@ -23,9 +23,11 @@ use indicatif::ProgressBar;
 use rand::{random, Rng};
 use rtweekend::random_double2;
 use sphere::moving_sphere;
-use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::Arc, vec};
+use std::{f32::INFINITY, mem::zeroed, rc::Rc, sync::{Arc, mpsc::channel}, vec};
 use texture::checker_texture;
-use vec3::random_in_unit_sphere;
+
+use threadpool::ThreadPool;
+
 
 use crate::{aarec::{rotate_y, translate, xy_rect, xz_rect, yz_rect}, box_::Box_, camera::Camera, constant_medium::Constant_medium, hittable::Hittable, hittable_list::Hittable_list, materia::{dielectric, diffuse_light, lambertian, metal}, rtweekend::random_double, sphere::Sphere, texture::{image_texture, noise_texture}};
 pub use ray::Ray;
@@ -159,7 +161,7 @@ pub fn final_scene(world: &mut Hittable_list){
     let mut boxes2 = Hittable_list::new();
     let white = Arc::new(lambertian::new(Vec3::new(0.73,0.73,0.73)));
     let ns = 1000;
-    for j in 0..ns{
+    for _j in 0..ns{
         boxes2.add(Arc::new(Sphere::new(Vec3::new(random_double2(0.0,165.0),random_double2(0.0,165.0),random_double2(0.0,165.0)),10.0,white.clone())));
     }
     let tp = Arc::new(BVHNODE::new(&boxes2.objects,0,boxes2.objects.len(),0.0,1.0));
@@ -176,7 +178,7 @@ pub fn color(r: &Ray, background:&Vec3,world: &dyn Hittable, depth: i32) -> Vec3
     if let Some(rec_) = t {
         let mut scattered = Ray::new(Vec3::zero(), Vec3::zero(), 0.0);
         let mut attenuation = Vec3::zero();
-        let mut emitted = rec_.mat_ptr.emitted(rec_.u.clone(),rec_.v.clone(),&rec_.p.clone());
+        let emitted = rec_.mat_ptr.emitted(rec_.u.clone(),rec_.v.clone(),&rec_.p.clone());
         //println!("{},{},{}\n",emitted.x,emitted.y,emitted.z);
         if !rec_
             .mat_ptr
@@ -222,9 +224,10 @@ fn main() {
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
+    
     let mut lookat = Vec3::new(0.0, 0.0, 0.0);
-    let mut vup = Vec3::new(0.0, 1.0, 0.0);
-    let mut dist_to_focus = 10.0;
+    let vup = Vec3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = 10.0;
     let mut aperture = 0.1;
     let mut world: Hittable_list = Hittable_list::new();
     let mut vfov = 20.0;
@@ -382,38 +385,144 @@ fn main() {
         0.0,
         1.0,
     );
-    let mut img: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
-    let bar = ProgressBar::new(IMAGE_WIDTH as u64);
 
-    for j in 0..IMAGE_WIDTH {
-        for i in 0..IMAGE_HEIGHT {
-            let pixel = img.get_pixel_mut(j as u32, i as u32);
-            let mut pixel_color = Vec3::zero();
-            for _s in 0..SAMPLES_PER_PIXEL {
-                let u = (((j as f64 + random_double(0.0, 100.0)) as f64)
-                    / (IMAGE_WIDTH as f64 - 1.0)) as f64;
-                let v = (((IMAGE_HEIGHT - i) as f64 - random_double(0.0, 100.0) as f64)
-                    / (IMAGE_HEIGHT as f64 - 1.0)) as f64;
-                let r = cam.get_ray(u, v);
-                pixel_color += color(&r, &background,&world, MAX_DEPTH);
+
+    let (tx, rx) = channel();
+    let n_jobs = 32;
+    let n_workers = 4;
+    let pool = ThreadPool::new(n_workers);
+
+
+
+
+
+
+
+
+
+    let mut results: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32 , IMAGE_HEIGHT as u32);
+    let bar = ProgressBar::new(n_jobs as u64);
+
+    for i in 0..n_jobs {
+        let tx = tx.clone();
+        let world_ = world.clone();
+        //let lights_ptr = lights.clone();
+        pool.execute(move || {
+            let row_begin = IMAGE_HEIGHT as usize * i as usize / n_jobs;
+            let row_end = IMAGE_HEIGHT as usize * (i as usize + 1) / n_jobs;
+            let render_height = row_end - row_begin;
+            let mut img: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, render_height as u32);
+            for x in 0..IMAGE_WIDTH {
+                for (img_y, y) in (row_begin..row_end).enumerate() {
+                    let y = y as u32;
+                    let mut pixel_color = Vec3::new(0.0, 0.0, 0.0);
+                    for _s in 0..SAMPLES_PER_PIXEL {
+                        let u = (x as f64 + random_double(0.0,100.0)) / ((IMAGE_WIDTH - 1) as f64);
+                        let v = ((IMAGE_HEIGHT as u32- y) as f64 - random_double(0.0,100.0)) / ((IMAGE_HEIGHT - 1) as f64);
+                        let r = cam.get_ray(u, v);
+                        pixel_color += color(&r, &background, &world_,  MAX_DEPTH);
+                    }
+                    let mut r = pixel_color.x;
+                    let mut g = pixel_color.y;
+                    let mut b = pixel_color.z;
+                    
+                    let scale = 1.0 / (SAMPLES_PER_PIXEL as f64);
+                    r = (r * scale).sqrt();
+                    g = (g * scale).sqrt();
+                    b = (b * scale).sqrt();
+                    //println!("{},{},{}\n",r,b,g);
+                    
+                    // if r != r {
+                    //     r = 0.0;
+                    // }
+                    // if g != g {
+                    //     g = 0.0;
+                    // }
+                    // if b != b {
+                    //     b = 0.0;
+                    // }
+                    let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
+                    let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
+                    let ib = (256.0 * clamp(b, 0.0, 0.999)) as u8;
+                    let pixel = img.get_pixel_mut(x as u32, img_y as u32);
+                    *pixel = image::Rgb([ir, ig, ib]);
+                    // let r = (r / SAMPLES_PER_PIXEL as f64).sqrt();
+                    // let g = (g / SAMPLES_PER_PIXEL as f64).sqrt();
+                    // let b = (b / SAMPLES_PER_PIXEL as f64).sqrt();
+                    // let pixel = img.get_pixel_mut(x as u32, img_y as u32);
+                    // *pixel = image::Rgb([(r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8]);
+                }
             }
-            let mut r = pixel_color.x;
-            let mut g = pixel_color.y;
-            let mut b = pixel_color.z;
-        
-            let scale = 1.0 / (SAMPLES_PER_PIXEL as f64);
-            r = (r * scale).sqrt();
-            g = (g * scale).sqrt();
-            b = (b * scale).sqrt();
-            //println!("{},{},{}\n",r,b,g);
-            let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
-            let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
-            let ib = (256.0 * clamp(b, 0.0, 0.999)) as u8;
-            *pixel = image::Rgb([ir, ig, ib]);
+            tx.send((row_begin..row_end, img))
+                .expect("failed to send result");
+        });
+    }
+
+
+
+    for (rows, data) in rx.iter().take(n_jobs) {
+        for (idx, row) in rows.enumerate() {
+            for col in 0..IMAGE_WIDTH {
+                let row = row as u32;
+                let idx = idx as u32;
+                *results.get_pixel_mut(col as u32, row) = *data.get_pixel(col as u32, idx);
+            }
         }
         bar.inc(1);
     }
 
-    img.save("output/test.png").unwrap();
+
+    results.save("output/test.png").unwrap();
     bar.finish();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // let mut img: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
+    // let bar = ProgressBar::new(IMAGE_WIDTH as u64);
+
+    // for j in 0..IMAGE_WIDTH {
+    //     for i in 0..IMAGE_HEIGHT {
+    //         let pixel = img.get_pixel_mut(j as u32, i as u32);
+    //         let mut pixel_color = Vec3::zero();
+    //         for _s in 0..SAMPLES_PER_PIXEL {
+    //             let u = (((j as f64 + random_double(0.0, 100.0)) as f64)
+    //                 / (IMAGE_WIDTH as f64 - 1.0)) as f64;
+    //             let v = (((IMAGE_HEIGHT - i) as f64 - random_double(0.0, 100.0) as f64)
+    //                 / (IMAGE_HEIGHT as f64 - 1.0)) as f64;
+    //             let r = cam.get_ray(u, v);
+    //             pixel_color += color(&r, &background,&world, MAX_DEPTH);
+    //         }
+    //         let mut r = pixel_color.x;
+    //         let mut g = pixel_color.y;
+    //         let mut b = pixel_color.z;
+        
+    //         let scale = 1.0 / (SAMPLES_PER_PIXEL as f64);
+    //         r = (r * scale).sqrt();
+    //         g = (g * scale).sqrt();
+    //         b = (b * scale).sqrt();
+    //         //println!("{},{},{}\n",r,b,g);
+    //         let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
+    //         let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
+    //         let ib = (256.0 * clamp(b, 0.0, 0.999)) as u8;
+    //         *pixel = image::Rgb([ir, ig, ib]);
+    //     }
+    //     bar.inc(1);
+    // }
+
+    // img.save("output/test.png").unwrap();
+    // bar.finish();
 }
