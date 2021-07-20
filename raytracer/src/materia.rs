@@ -10,7 +10,7 @@ use crate::rtweekend::random_double;
 use crate::texture::{solid_color, Texture};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
 
-pub trait material:Send + Sync{
+pub trait material: Send + Sync {
     fn scatter(
         &self,
         r_in: &Ray,
