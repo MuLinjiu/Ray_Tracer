@@ -220,7 +220,7 @@ fn main() {
     //6
     const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 1000;
+    const SAMPLES_PER_PIXEL: i32 = 500;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -333,6 +333,7 @@ fn main() {
         vfov = 40.0;
     }else if x == 6{
         final_scene(&mut world);
+        aperture = 0.0;
         lookfrom = Vec3::new(478.0, 278.0, -600.0);
         lookat = Vec3::new(278.0,278.0,0.0);
         vfov = 40.0;
