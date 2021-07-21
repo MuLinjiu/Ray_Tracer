@@ -1,9 +1,6 @@
 use crate::rtweekend::random_double2;
 use crate::vec3::Vec3;
-use crate::{
-    ray::Ray,
-    vec3::{random_in_unit_disk, random_in_unit_sphere},
-};
+use crate::{ray::Ray, vec3::random_in_unit_disk};
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct Camera {
     origin: Vec3,
@@ -40,7 +37,7 @@ impl Camera {
         let u_ = Vec3::unit(Vec3::cross(vup, w_));
         let v_ = Vec3::cross(w_, u_);
 
-        let focal_length: f64 = 1.0;
+        let _focal_length: f64 = 1.0;
         Self {
             u: u_,
             v: v_,

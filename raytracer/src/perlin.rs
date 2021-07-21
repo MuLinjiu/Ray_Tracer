@@ -1,7 +1,5 @@
-use imageproc::definitions::Position;
-
 use crate::{
-    rtweekend::{random_double, random_double2, random_int},
+    rtweekend::{random_double2, random_int},
     Vec3,
 };
 
@@ -49,7 +47,7 @@ impl Perlin {
 
     pub fn permute(p: &mut [i32; POINT_COUNT], n: usize) {
         for i in n - 1..0 {
-            let mut target = random_int(0, i as i32);
+            let target = random_int(0, i as i32);
             let tmp = p[i];
             p[i] = p[target as usize];
             p[target as usize] = tmp;
@@ -61,9 +59,9 @@ impl Perlin {
         let j = p.y.floor() as i32;
         let k = p.z.floor() as i32;
 
-        let mut u = p.x - p.x.floor();
-        let mut v = p.y - p.y.floor();
-        let mut w = p.z - p.z.floor();
+        let u = p.x - p.x.floor();
+        let v = p.y - p.y.floor();
+        let w = p.z - p.z.floor();
 
         let mut c = [[[Vec3::zero(); 2]; 2]; 2];
 
@@ -107,7 +105,7 @@ impl Perlin {
         let mut accum = 0.0;
         let mut tmp_p = p;
         let mut weight = 1.0;
-        for i in 0..depth {
+        for _i in 0..depth {
             accum += weight * Perlin::noise(&self, tmp_p.clone());
             weight *= 0.5;
             tmp_p = tmp_p * 2.0;

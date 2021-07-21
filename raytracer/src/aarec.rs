@@ -3,22 +3,22 @@ use std::{f64::INFINITY, sync::Arc};
 use crate::{
     aabb::{fmax, fmin, AABB},
     camera::degrees_to_radians,
-    hittable::{self, hit_record, Hittable},
-    materia::{self, material, metal},
+    hittable::{self, HitRecord, Hittable},
+    materia::Material,
     Ray, Vec3,
 };
 
-pub struct xy_rect {
+pub struct XyRect {
     x0: f64,
     x1: f64,
     y0: f64,
     y1: f64,
     k: f64,
-    mp: Arc<dyn material>,
+    mp: Arc<dyn Material>,
 }
 
-impl xy_rect {
-    pub fn new(_x0: f64, _x1: f64, _y0: f64, _y1: f64, _k: f64, mat: Arc<dyn material>) -> Self {
+impl XyRect {
+    pub fn new(_x0: f64, _x1: f64, _y0: f64, _y1: f64, _k: f64, mat: Arc<dyn Material>) -> Self {
         Self {
             mp: mat.clone(),
             x0: _x0,
@@ -30,8 +30,8 @@ impl xy_rect {
     }
 }
 
-impl Hittable for xy_rect {
-    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::hit_record> {
+impl Hittable for XyRect {
+    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::HitRecord> {
         let t = (self.k - r.orig.z) / r.dir.z;
         if t < t_min || t > t_max {
             return None;
@@ -41,7 +41,7 @@ impl Hittable for xy_rect {
         if x < self.x0 || x > self.x1 || y < self.y0 || y > self.y1 {
             return None;
         }
-        let mut rec = hit_record::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
+        let mut rec = HitRecord::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
         rec.u = (x - self.x0) / (self.x1 - self.x0);
         rec.v = (y - self.y0) / (self.y1 - self.y0);
         rec.t = t;
@@ -52,7 +52,7 @@ impl Hittable for xy_rect {
         return Some(rec);
     }
 
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<crate::aabb::AABB> {
         Some(AABB::new(
             Vec3::new(self.x0, self.y0, self.k - 0.0001),
             Vec3::new(self.x1, self.y1, self.k + 0.0001),
@@ -60,17 +60,17 @@ impl Hittable for xy_rect {
     }
 }
 
-pub struct xz_rect {
+pub struct XzRect {
     x0: f64,
     x1: f64,
     z0: f64,
     z1: f64,
     k: f64,
-    mp: Arc<dyn material>,
+    mp: Arc<dyn Material>,
 }
 
-impl xz_rect {
-    pub fn new(_x0: f64, _x1: f64, _z0: f64, _z1: f64, _k: f64, mat: Arc<dyn material>) -> Self {
+impl XzRect {
+    pub fn new(_x0: f64, _x1: f64, _z0: f64, _z1: f64, _k: f64, mat: Arc<dyn Material>) -> Self {
         Self {
             mp: mat.clone(),
             x0: _x0,
@@ -82,8 +82,8 @@ impl xz_rect {
     }
 }
 
-impl Hittable for xz_rect {
-    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::hit_record> {
+impl Hittable for XzRect {
+    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::HitRecord> {
         let t = (self.k - r.orig.y) / r.dir.y;
         if t < t_min || t > t_max {
             return None;
@@ -93,7 +93,7 @@ impl Hittable for xz_rect {
         if x < self.x0 || x > self.x1 || z < self.z0 || z > self.z1 {
             return None;
         }
-        let mut rec = hit_record::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
+        let mut rec = HitRecord::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
         rec.u = (x - self.x0) / (self.x1 - self.x0);
         rec.v = (z - self.z0) / (self.z1 - self.z0);
         rec.t = t;
@@ -104,7 +104,7 @@ impl Hittable for xz_rect {
         return Some(rec);
     }
 
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<crate::aabb::AABB> {
         Some(AABB::new(
             Vec3::new(self.x0, self.k - 0.0001, self.z0),
             Vec3::new(self.x1, self.k + 0.0001, self.z1),
@@ -112,17 +112,17 @@ impl Hittable for xz_rect {
     }
 }
 
-pub struct yz_rect {
+pub struct YzRect {
     y0: f64,
     y1: f64,
     z0: f64,
     z1: f64,
     k: f64,
-    mp: Arc<dyn material>,
+    mp: Arc<dyn Material>,
 }
 
-impl yz_rect {
-    pub fn new(_y0: f64, _y1: f64, _z0: f64, _z1: f64, _k: f64, mat: Arc<dyn material>) -> Self {
+impl YzRect {
+    pub fn new(_y0: f64, _y1: f64, _z0: f64, _z1: f64, _k: f64, mat: Arc<dyn Material>) -> Self {
         Self {
             mp: mat.clone(),
             y0: _y0,
@@ -134,8 +134,8 @@ impl yz_rect {
     }
 }
 
-impl Hittable for yz_rect {
-    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::hit_record> {
+impl Hittable for YzRect {
+    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::HitRecord> {
         let t = (self.k - r.orig.x) / r.dir.x;
         if t < t_min || t > t_max {
             return None;
@@ -145,7 +145,7 @@ impl Hittable for yz_rect {
         if y < self.y0 || y > self.y1 || z < self.z0 || z > self.z1 {
             return None;
         }
-        let mut rec = hit_record::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
+        let mut rec = HitRecord::new(Vec3::zero(), Vec3::zero(), 0.0, self.mp.clone(), false);
         rec.u = (y - self.y0) / (self.y1 - self.y0);
         rec.v = (z - self.z0) / (self.z1 - self.z0);
         rec.t = t;
@@ -156,7 +156,7 @@ impl Hittable for yz_rect {
         return Some(rec);
     }
 
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<crate::aabb::AABB> {
+    fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<crate::aabb::AABB> {
         Some(AABB::new(
             Vec3::new(self.k - 0.0001, self.y0, self.z0),
             Vec3::new(self.k + 0.0001, self.y1, self.z1),
@@ -164,12 +164,12 @@ impl Hittable for yz_rect {
     }
 }
 
-pub struct translate {
+pub struct Translate {
     offset: Vec3,
     ptr: Arc<dyn Hittable>,
 }
 
-impl translate {
+impl Translate {
     pub fn new(p: Arc<dyn Hittable>, displacement: Vec3) -> Self {
         Self {
             ptr: p.clone(),
@@ -178,8 +178,8 @@ impl translate {
     }
 }
 
-impl Hittable for translate {
-    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
+impl Hittable for Translate {
+    fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let moved_r = Ray::new(r.orig - self.offset, r.dir, r.time);
         if let Some(mut rec) = self.ptr.hit(&moved_r, t_min, t_max) {
             rec.p += self.offset;
@@ -200,7 +200,7 @@ impl Hittable for translate {
     }
 }
 
-pub struct rotate_y {
+pub struct RotateY {
     pub ptr: Arc<dyn Hittable>,
     pub sin_theta: f64,
     pub cos_theta: f64,
@@ -208,16 +208,16 @@ pub struct rotate_y {
     pub bbox: AABB,
 }
 
-impl rotate_y {
-    pub fn new(p: Arc<Hittable>, angle: f64) -> Self {
+impl RotateY {
+    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
         let radians = degrees_to_radians(angle);
         let sintheta = radians.sin();
         let costheta = radians.cos();
         let mut flag = false;
         let hashbox_ = p.bounding_box(0.0, 1.0);
         let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(BBOX) = hashbox_ {
-            bbox = BBOX.clone();
+        if let Some(bbbox) = hashbox_ {
+            bbox = bbbox.clone();
             flag = true;
         }
 
@@ -261,8 +261,8 @@ impl rotate_y {
     }
 }
 
-impl Hittable for rotate_y {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
+impl Hittable for RotateY {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut origin = r.orig;
         let mut direction = r.dir;
 
@@ -295,7 +295,7 @@ impl Hittable for rotate_y {
         None
     }
 
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+    fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<AABB> {
         let output_box = self.bbox.clone();
         Some(output_box)
     }

@@ -1,10 +1,9 @@
-use std::{cmp::Ordering, sync::Arc};
+use std::sync::Arc;
 
 use crate::{
     aabb::AABB,
-    hittable::{hit_record, Hittable},
-    hittable_list::Hittable_list,
-    rtweekend::{random_double2, random_int},
+    hittable::{HitRecord, Hittable},
+    rtweekend::random_int,
     Ray, Vec3,
 };
 
@@ -15,7 +14,7 @@ pub struct BVHNODE {
 }
 
 impl Hittable for BVHNODE {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         if !self.box1.hit(ray, t_min, t_max) {
             //println!("1\n");
             return None;
@@ -128,11 +127,11 @@ impl BVHNODE {
     pub fn box_x_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> bool {
         let box_a = AABB::new(Vec3::zero(), Vec3::zero());
         let box_b = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(rec1) = a.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = a.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }
-        if let Some(rec1) = b.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = b.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }
@@ -143,11 +142,11 @@ impl BVHNODE {
     pub fn box_y_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> bool {
         let box_a = AABB::new(Vec3::zero(), Vec3::zero());
         let box_b = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(rec1) = a.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = a.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }
-        if let Some(rec1) = b.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = b.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }
@@ -157,11 +156,11 @@ impl BVHNODE {
     pub fn box_z_compare(a: &Arc<dyn Hittable>, b: &Arc<dyn Hittable>) -> bool {
         let box_a = AABB::new(Vec3::zero(), Vec3::zero());
         let box_b = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(rec1) = a.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = a.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }
-        if let Some(rec1) = b.bounding_box(0.0, 0.0) {
+        if let Some(_rec1) = b.bounding_box(0.0, 0.0) {
         } else {
             println!("no bounding box in bvh node constructor\n");
         }

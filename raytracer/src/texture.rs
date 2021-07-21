@@ -2,31 +2,30 @@ use std::{path::Path, sync::Arc};
 
 use crate::clamp;
 
-use image::{GenericImageView, RgbImage};
-use imageproc::noise;
+use image::GenericImageView;
 
 use crate::{perlin::Perlin, Vec3};
 
 pub trait Texture: Send + Sync {
     fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3;
 }
-pub struct solid_color {
+pub struct SolidColor {
     color_value: Vec3,
 }
 
-impl solid_color {
+impl SolidColor {
     pub fn new(c: Vec3) -> Self {
         Self { color_value: c }
     }
-    fn new1(red: f64, green: f64, blue: f64) -> Self {
-        Self {
-            color_value: Vec3::new(red, green, blue),
-        }
-    }
+    // fn new1(red: f64, green: f64, blue: f64) -> Self {
+    //     Self {
+    //         color_value: Vec3::new(red, green, blue),
+    //     }
+    // }
 }
 
-impl Texture for solid_color {
-    fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
+impl Texture for SolidColor {
+    fn value(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         return self.color_value;
     }
 }
@@ -42,18 +41,18 @@ impl BaseColor {
 }
 
 impl Texture for BaseColor {
-    fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
+    fn value(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         self.color
     }
 }
 
 #[derive(Clone)]
-pub struct checker_texture {
+pub struct CheckerTexture {
     odd: Arc<dyn Texture>,
     even: Arc<dyn Texture>,
 }
 
-impl checker_texture {
+impl CheckerTexture {
     pub fn new(_even: Vec3, _odd: Vec3) -> Self {
         Self {
             even: Arc::new(BaseColor::vectobase(_even)),
@@ -62,7 +61,7 @@ impl checker_texture {
     }
 }
 
-impl Texture for checker_texture {
+impl Texture for CheckerTexture {
     fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         let sines = (10.0 * p.x).sin() * (10.0 * p.y).sin() * (10.0 * p.z).sin();
         if sines < 0.0 {
@@ -73,19 +72,19 @@ impl Texture for checker_texture {
     }
 }
 
-pub struct noise_texture {
+pub struct NoiseTexture {
     pub noise: Perlin,
     pub scare: f64,
 }
 
-impl noise_texture {
-    pub fn new() -> Self {
-        let n = Perlin::new();
-        Self {
-            noise: n,
-            scare: 0.0,
-        }
-    }
+impl NoiseTexture {
+    // pub fn new() -> Self {
+    //     let n = Perlin::new();
+    //     Self {
+    //         noise: n,
+    //         scare: 0.0,
+    //     }
+    // }
     pub fn new1(sc: f64) -> Self {
         let n = Perlin::new();
         Self {
@@ -95,8 +94,8 @@ impl noise_texture {
     }
 }
 
-impl Texture for noise_texture {
-    fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
+impl Texture for NoiseTexture {
+    fn value(&self, _u: f64, _v: f64, p: &Vec3) -> Vec3 {
         return Vec3::new(1.0, 1.0, 1.0)
             * 0.5
             * (1.0 + (10.0 * self.noise.turb(*p, 7) + self.scare * p.z).sin());
@@ -105,16 +104,16 @@ impl Texture for noise_texture {
 
 const BYTES_PER_PIXEL: i32 = 3;
 
-pub struct image_texture {
+pub struct ImageTexture {
     pub width: i32,
     pub height: i32,
     pub bytes_per_scanline: i32,
     pub data: image::DynamicImage,
 }
 
-impl image_texture {
+impl ImageTexture {
     pub fn new(filename: &str) -> Self {
-        let components_per_pixel = BYTES_PER_PIXEL;
+        let _components_per_pixel = BYTES_PER_PIXEL;
         let im = image::open(&Path::new(filename)).unwrap();
         Self {
             width: im.dimensions().0 as i32,
@@ -125,8 +124,8 @@ impl image_texture {
     }
 }
 
-impl Texture for image_texture {
-    fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
+impl Texture for ImageTexture {
+    fn value(&self, u: f64, v: f64, _p: &Vec3) -> Vec3 {
         let u = clamp(u, 0.0, 1.0);
         let v = 1.0 - clamp(v, 0.0, 1.0);
         let mut i = (u * self.width as f64) as u32;

@@ -2,18 +2,18 @@ use std::sync::Arc;
 
 use crate::{
     aabb::AABB,
-    hittable::{hit_record, Hittable},
+    hittable::{HitRecord, Hittable},
     vec3::Vec3,
     Ray,
 };
 
 #[allow(clippy::float_cmp)]
 #[derive(Clone)]
-pub struct Hittable_list {
+pub struct HittableList {
     pub objects: Vec<Arc<dyn Hittable>>,
 }
 
-impl Hittable_list {
+impl HittableList {
     pub fn new() -> Self {
         Self {
             objects: Vec::new(),
@@ -24,8 +24,8 @@ impl Hittable_list {
     }
 }
 
-impl Hittable for Hittable_list {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
+impl Hittable for HittableList {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = None;
         let mut closest_so_far = t_max;
         for object in self.objects.iter() {
@@ -44,7 +44,7 @@ impl Hittable for Hittable_list {
             return None;
         }
         let mut output = AABB::new(Vec3::zero(), Vec3::zero());
-        let tempbox = AABB::new(Vec3::zero(), Vec3::zero());
+        let _tempbox = AABB::new(Vec3::zero(), Vec3::zero());
         let mut first_box = true;
         for object in self.objects.iter() {
             if let Option::Some(tempbox) = object.bounding_box(time0, time1) {

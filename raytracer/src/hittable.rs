@@ -1,24 +1,22 @@
-use std::f64::consts::PI;
-use std::rc::Rc;
 use std::sync::Arc;
 
 use crate::aabb::AABB;
-use crate::materia::material;
+use crate::materia::Material;
 use crate::ray::Ray;
 use crate::vec3::Vec3;
 #[derive(Clone)]
-pub struct hit_record {
+pub struct HitRecord {
     pub p: Vec3,
     pub normal: Vec3,
     pub t: f64,
-    pub mat_ptr: Arc<dyn material>,
+    pub mat_ptr: Arc<dyn Material>,
     pub front_face: bool,
     pub u: f64,
     pub v: f64,
 }
 
-impl hit_record {
-    pub fn new(p_: Vec3, n: Vec3, t_: f64, mat: Arc<dyn material>, f: bool) -> Self {
+impl HitRecord {
+    pub fn new(p_: Vec3, n: Vec3, t_: f64, mat: Arc<dyn Material>, f: bool) -> Self {
         Self {
             p: p_,
             normal: n,
@@ -44,6 +42,6 @@ impl hit_record {
 }
 
 pub trait Hittable: Send + Sync {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record>;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB>;
 }

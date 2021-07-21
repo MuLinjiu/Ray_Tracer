@@ -1,22 +1,22 @@
 use std::f64::consts::PI;
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use crate::aabb::AABB;
 use crate::vec3::Vec3;
 use crate::{
-    hittable::{hit_record, Hittable},
-    materia::{material, metal},
+    hittable::{HitRecord, Hittable},
+    materia::{Material, Metal},
     ray::Ray,
 };
 
 pub struct Sphere {
     pub radius: f64,
     pub center: Vec3,
-    pub mat_ptr: Arc<dyn material>,
+    pub mat_ptr: Arc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, mat_ptr: Arc<dyn material>) -> Self {
+    pub fn new(center: Vec3, radius: f64, mat_ptr: Arc<dyn Material>) -> Self {
         Self {
             center,
             radius,
@@ -34,12 +34,12 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
-        let mut rec = hit_record::new(
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut rec = HitRecord::new(
             Vec3::zero(),
             Vec3::zero(),
             0.0,
-            Arc::new(metal::new(Vec3::zero(), 0.0)),
+            Arc::new(Metal::new(Vec3::zero(), 0.0)),
             false,
         );
         let oc: Vec3 = r.orig - self.center;
@@ -72,7 +72,7 @@ impl Hittable for Sphere {
         }
         return None;
     }
-    fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+    fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AABB> {
         let output = AABB::new(
             self.center - Vec3::new(self.radius, self.radius, self.radius),
             self.center + Vec3::new(self.radius, self.radius, self.radius),
@@ -81,23 +81,23 @@ impl Hittable for Sphere {
     }
 }
 
-pub struct moving_sphere {
+pub struct MovingSphere {
     center0: Vec3,
     center1: Vec3,
     time0: f64,
     time1: f64,
     radius: f64,
-    mat_ptr: Arc<dyn material>,
+    mat_ptr: Arc<dyn Material>,
 }
 
-impl moving_sphere {
+impl MovingSphere {
     pub fn new(
         cen0: Vec3,
         cen1: Vec3,
         _time0: f64,
         _time1: f64,
         r: f64,
-        m: Arc<dyn material>,
+        m: Arc<dyn Material>,
     ) -> Self {
         Self {
             center0: Vec3::new(cen0.x, cen0.y, cen0.z),
@@ -115,13 +115,13 @@ impl moving_sphere {
     }
 }
 
-impl Hittable for moving_sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<hit_record> {
-        let mut rec = hit_record::new(
+impl Hittable for MovingSphere {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        let mut rec = HitRecord::new(
             Vec3::zero(),
             Vec3::zero(),
             0.0,
-            Arc::new(metal::new(Vec3::zero(), 0.0)),
+            Arc::new(Metal::new(Vec3::zero(), 0.0)),
             false,
         );
         let oc: Vec3 = r.orig - self.center(r.time);

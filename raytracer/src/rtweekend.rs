@@ -1,4 +1,4 @@
-use rand::{random, Rng};
+use rand::Rng;
 pub fn random_double(min: f64, max: f64) -> f64 {
     let secret_number = rand::thread_rng().gen_range(min..max);
     secret_number / (max - min)

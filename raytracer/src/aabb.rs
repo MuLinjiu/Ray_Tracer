@@ -48,12 +48,12 @@ impl AABB {
         }
     }
 
-    pub fn hit(&self, r: &Ray, mut t_min: f64, mut t_max: f64) -> bool {
+    pub fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> bool {
         for a in 0..3 {
-            let invD = 1.0 / r.dir.get(a);
-            let mut t0 = (self.minmum.get(a) - r.orig.get(a)) * invD;
-            let mut t1 = (self.maxmum.get(a) - r.orig.get(a)) * invD;
-            if invD < 0.0 {
+            let inv_d = 1.0 / r.dir.get(a);
+            let mut t0 = (self.minmum.get(a) - r.orig.get(a)) * inv_d;
+            let mut t1 = (self.maxmum.get(a) - r.orig.get(a)) * inv_d;
+            if inv_d < 0.0 {
                 let mid = t0;
                 t0 = t1;
                 t1 = mid;
