@@ -1,12 +1,6 @@
 use std::{f64::INFINITY, sync::Arc};
 
-use crate::{
-    aabb::{fmax, fmin, AABB},
-    camera::degrees_to_radians,
-    hittable::{self, HitRecord, Hittable},
-    materia::Material,
-    Ray, Vec3,
-};
+use crate::{Ray, Vec3, aabb::{fmax, fmin, AABB}, camera::degrees_to_radians, hittable::{self, HitRecord, Hittable}, materia::Material, rtweekend::random_double2};
 
 pub struct XyRect {
     x0: f64,
@@ -83,6 +77,23 @@ impl XzRect {
 }
 
 impl Hittable for XzRect {
+    fn pdf_value(&self, o:&Vec3, v:&Vec3) -> f64 {
+        //let rec;
+        if let Some(rec) = self.hit(&Ray::new(o.clone(),v.clone(),0.0), 0.001, INFINITY){
+            let area = (self.x1 - self.x0) * (self.z1 - self.z0);
+            let distance_squared = rec.t * rec.t * v.squared_length();
+            let cosine = Vec3::dot(v.clone(),rec.normal).abs() / v.len();
+            return distance_squared / (cosine * area);
+        }
+        0.0
+    }
+
+    fn random(&self, o:Vec3) -> Vec3 {
+        let random_point = Vec3::new(random_double2(self.x0, self.x1),self.k,random_double2(self.z0, self.z1));
+        random_point - o
+    }
+
+
     fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::HitRecord> {
         let t = (self.k - r.orig.y) / r.dir.y;
         if t < t_min || t > t_max {

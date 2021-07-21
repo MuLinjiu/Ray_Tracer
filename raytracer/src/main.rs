@@ -12,6 +12,8 @@ mod ray;
 mod rtweekend;
 mod sphere;
 mod texture;
+mod pdf;
+mod onb;
 #[allow(clippy::float_cmp)]
 mod vec3;
 
@@ -19,25 +21,15 @@ use bvh::BVHNODE;
 use camera::clamp;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
+use pdf::{CosinePdf, HittablePdf, MixturePdf, Pdf};
 use rtweekend::random_double2;
 use sphere::MovingSphere;
-use std::{f32::INFINITY, f64::consts::PI, sync::{mpsc::channel, Arc}};
+use std::{f32::INFINITY, sync::{mpsc::channel, Arc}};
 use texture::CheckerTexture;
 
 use threadpool::ThreadPool;
 
-use crate::{
-    aarec::{RotateY, Translate, XyRect, XzRect, YzRect},
-    box_::Box_,
-    camera::Camera,
-    constant_medium::ConstantMedium,
-    hittable::Hittable,
-    hittable_list::HittableList,
-    materia::{Dielectric, DiffuseLight, Lambertian, Metal},
-    rtweekend::random_double,
-    sphere::Sphere,
-    texture::{ImageTexture, NoiseTexture},
-};
+use crate::{aarec::{RotateY, Translate, XyRect, XzRect, YzRect}, box_::Box_, camera::Camera, constant_medium::ConstantMedium, hittable::Hittable, hittable_list::HittableList, materia::{Dielectric, DiffuseLight, Lambertian, Metal}, onb::FlipFace, rtweekend::random_double, sphere::Sphere, texture::{ImageTexture, NoiseTexture}};
 pub use ray::Ray;
 pub use vec3::Vec3;
 
@@ -244,7 +236,7 @@ pub fn final_scene(world: &mut HittableList) {
     )))
 }
 
-pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, depth: i32) -> Vec3 {
+pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<dyn Hittable>,depth: i32) -> Vec3 {
     if depth <= 0 {
         return Vec3::zero();
     }
@@ -255,7 +247,7 @@ pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, depth: i32) -> Ve
         //let mut pdf = 0.0;
         let emitted = rec_
             .mat_ptr
-            .emitted(rec_.u.clone(), rec_.v.clone(), &rec_.p.clone());
+            .emitted(r,&rec_,rec_.u.clone(), rec_.v.clone(), &rec_.p.clone());
         //println!("{},{},{}\n",emitted.x,emitted.y,emitted.z);
         if !rec_
             .mat_ptr
@@ -288,21 +280,40 @@ pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, depth: i32) -> Ve
         // if light_cosine < 0.000001 {
         //     return emitted;
         // }
-        let pdf = rec_.mat_ptr.get_pdf_value(&rec_, &mut scattered);
-        //let pdf = distance_squared / (light_cosine * light_area);
-        //scattered = Ray::new()
+        // //let pdf = rec_.mat_ptr.get_pdf_value(&rec_, &mut scattered);
+        // let pdf = distance_squared / (light_cosine * light_area);
+        // //scattered = Ray::new()
         // scattered.orig = rec_.p;
         // scattered.dir = to_light;
         // scattered.time = r.time;
-        let t = color(&scattered, background, world, depth - 1);
+        
+
+        
+
+        // let light_pdf = HittablePdf::new(lights.clone(),rec_.p);
+        // scattered.orig = rec_.p;
+        // scattered.dir = light_pdf.generate();
+        // scattered.time = r.time;
+        // let pdf_value = light_pdf.value(&scattered.dir);
+
+        let p0 = Arc::new(HittablePdf::new(lights.clone(),rec_.p));
+        let p1 = Arc::new(CosinePdf::new(&rec_.normal));
+        let mixed_pdf = MixturePdf::new(p0,p1);
+        scattered.orig = rec_.p;
+        scattered.dir = mixed_pdf.generate();
+        scattered.time = r.time;
+        let pdf_value = mixed_pdf.value(&scattered.dir);
+
         //println!("2\n");
+        let t = color(&scattered, background, world, &lights.clone(),depth - 1);
         return emitted
             + Vec3::new(
                 t.x * attenuation.x,
                 t.y * attenuation.y,
                 t.z * attenuation.z,
-            ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered) / pdf;
-        //return emitted + color(&scattered, background, world, depth - 1) * attenuation;
+            ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered) / pdf_value;
+        
+    
     } else {
         // let unit_direction = Vec3::unit(r.dir);
         // let t = 0.5 * (unit_direction.y + 1.0);
@@ -323,7 +334,7 @@ fn main() {
     //6
     const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 50;
+    const SAMPLES_PER_PIXEL: i32 = 100;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -335,7 +346,10 @@ fn main() {
     let mut world: HittableList = HittableList::new();
     let mut vfov = 20.0;
     let mut background = Vec3::zero();
-    let x = 6;
+
+    let lights:Arc<dyn Hittable> = Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0))));
+
+    let x = 5;
     if x == 0 {
         random_scene(&mut world);
         background = Vec3::new(0.7, 0.8, 1.0);
@@ -420,9 +434,9 @@ fn main() {
             0.0,
             red.clone(),
         )));
-        world.add(Arc::new(XzRect::new(
+        world.add(Arc::new(FlipFace::new(Arc::new(XzRect::new(
             213.0, 343.0, 227.0, 332.0, 554.0, light,
-        )));
+        )))));
         world.add(Arc::new(XzRect::new(
             0.0,
             555.0,
@@ -537,8 +551,8 @@ fn main() {
     );
 
     let (tx, rx) = channel();
-    let n_jobs = 16;
-    let n_workers = 8;
+    let n_jobs = 32;
+    let n_workers = 16;
     let pool = ThreadPool::new(n_workers);
 
     let mut results: RgbImage = ImageBuffer::new(IMAGE_WIDTH as u32, IMAGE_HEIGHT as u32);
@@ -547,6 +561,7 @@ fn main() {
     for i in 0..n_jobs {
         let tx = tx.clone();
         let world_ = world.clone();
+        let light = lights.clone();
         //let lights_ptr = lights.clone();
         pool.execute(move || {
             let row_begin = IMAGE_HEIGHT as usize * i as usize / n_jobs;
@@ -562,7 +577,7 @@ fn main() {
                         let v = ((IMAGE_HEIGHT as u32 - y) as f64 - random_double(0.0, 100.0))
                             / ((IMAGE_HEIGHT - 1) as f64);
                         let r = cam.get_ray(u, v);
-                        pixel_color += color(&r, &background, &world_, MAX_DEPTH);
+                        pixel_color += color(&r, &background, &world_, &light,MAX_DEPTH);
                     }
                     let mut r = pixel_color.x;
                     let mut g = pixel_color.y;

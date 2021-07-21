@@ -3,10 +3,24 @@ use std::sync::Arc;
 
 use crate::hittable::HitRecord;
 
+use crate::onb::{Onb};
 use crate::ray::Ray;
 use crate::rtweekend::random_double;
 use crate::texture::{SolidColor, Texture};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
+
+
+pub fn random_cosine_direction() -> Vec3{
+    let r1 = random_double(0.0, 100.0);
+    let r2 = random_double(0.0, 100.0);
+    let z = (1.0 - r2).sqrt();
+
+    let phi = 2.0 * PI * r1;
+    let x = phi.cos() * r2.sqrt();
+    let y = phi.sin() * r2.sqrt();
+
+    Vec3::new(x,y,z)
+}
 
 pub trait Material: Send + Sync {
     fn scatter(
@@ -18,17 +32,17 @@ pub trait Material: Send + Sync {
     ) -> bool;
 
     fn scattering_pdf(&self,
-        r_in: &Ray,
-        rec: &HitRecord,
-        scattered: &mut Ray,) -> f64{
+        _r_in: &Ray,
+        _rec: &HitRecord,
+        _scattered: &mut Ray,) -> f64{
             return 0.0;
         }
 
-    fn get_pdf_value(&self,rec: &HitRecord,scattered: &mut Ray) -> f64{
+    fn get_pdf_value(&self,_rec: &HitRecord,_scattered: &mut Ray) -> f64{
         return 0.0;
     }
 
-    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3;
+    fn emitted(&self, r_in:&Ray,rec:&HitRecord,u: f64, v: f64, p: &Vec3) -> Vec3;
 }
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct Metal {
@@ -50,7 +64,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn emitted(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord,_u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         return Vec3::zero();
     }
     fn scatter(
@@ -71,6 +85,17 @@ impl Material for Metal {
         attenuation.z = self.albedo.z;
         return Vec3::dot(scattered.dir, rec.normal) > 0.0;
     }
+
+    fn scattering_pdf(&self,
+        _r_in: &Ray,
+        _rec: &HitRecord,
+        _scattered: &mut Ray,) -> f64{
+            return 0.0;
+        }
+
+    fn get_pdf_value(&self,_rec: &HitRecord,_scattered: &mut Ray) -> f64{
+        return 0.0;
+    }
 }
 
 pub struct Lambertian {
@@ -90,10 +115,17 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn get_pdf_value(&self,rec: &HitRecord,scattered: &mut Ray,) -> f64 {
-        Vec3::dot(rec.normal.clone(),scattered.dir.clone()) / PI
+    fn get_pdf_value(&self,rec: &HitRecord,_scattered: &mut Ray,) -> f64 {
+        let uvw = Onb::build_from_w(&rec.normal.clone());
+        let direction = uvw.local1(&random_cosine_direction());
+        //let scatter_direction = rec.normal.clone() + random_in_unit_sphere();
+        //scattered = &Ray::new(rec.p, scatter_direction);
+        //scattered.orig = rec.p;
+        //scattered.dir = 
+
+        Vec3::dot(uvw.w,direction.unit()) / PI
     }
-    fn emitted(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -103,11 +135,15 @@ impl Material for Lambertian {
         attenuation: &mut Vec3,
         scattered: &mut Ray,
     ) -> bool {
-        let scatter_direction = rec.normal.clone() + random_in_unit_sphere();
+        let uvw = Onb::build_from_w(&rec.normal.clone());
+        let direction = uvw.local1(&random_cosine_direction());
+        //let scatter_direction = rec.normal.clone() + random_in_unit_sphere();
         //scattered = &Ray::new(rec.p, scatter_direction);
         scattered.orig = rec.p;
-        scattered.dir = scatter_direction;
+        scattered.dir = direction.unit();
         scattered.time = r_in.time;
+        
+        
         //attenuation = &self.albedo;
         // attenuation.x = self.albedo.x;
         // attenuation.y = self.albedo.y;
@@ -119,7 +155,7 @@ impl Material for Lambertian {
         return true;
     }
 
-    fn scattering_pdf(&self, r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
+    fn scattering_pdf(&self, _r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
         let cosine = Vec3::dot(rec.normal,Vec3::unit(scattered.dir));
         if cosine < 0.0 {
             return 0.0;
@@ -145,7 +181,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn emitted(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -216,8 +252,12 @@ impl DiffuseLight {
 }
 
 impl Material for DiffuseLight {
-    fn emitted(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
-        return self.emit.value(u, v, p);
+    fn emitted(&self, _r_in:&Ray,rec:&HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3 {
+        if rec.front_face{
+            return self.emit.value(u, v, p);
+        }
+        Vec3::zero()
+        //return self.emit.value(u, v, p);
     }
     fn scatter(
         &self,
