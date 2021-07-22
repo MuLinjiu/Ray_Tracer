@@ -21,10 +21,11 @@ use bvh::BVHNODE;
 use camera::clamp;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
+use materia::ScatterRecord;
 use pdf::{CosinePdf, HittablePdf, MixturePdf, Pdf};
 use rtweekend::random_double2;
 use sphere::MovingSphere;
-use std::{f32::INFINITY, sync::{mpsc::channel, Arc}};
+use std::{f64::INFINITY, sync::{mpsc::channel, Arc}};
 use texture::CheckerTexture;
 
 use threadpool::ThreadPool;
@@ -236,22 +237,24 @@ pub fn final_scene(world: &mut HittableList) {
     )))
 }
 
-pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<dyn Hittable>,depth: i32) -> Vec3 {
+pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<HittableList>,depth: i32) -> Vec3 {
     if depth <= 0 {
+        //println!("qq");
         return Vec3::zero();
     }
-    let t = world.hit(&r, 0.001, INFINITY as f64);
+    let t = world.hit(&r, 0.0001, INFINITY);
     if let Some(rec_) = t {
         let mut scattered = Ray::new(Vec3::zero(), Vec3::zero(), 0.0);
         let mut attenuation = Vec3::zero();
         //let mut pdf = 0.0;
+        let mut srec = ScatterRecord::new();
         let emitted = rec_
             .mat_ptr
             .emitted(r,&rec_,rec_.u.clone(), rec_.v.clone(), &rec_.p.clone());
-        //println!("{},{},{}\n",emitted.x,emitted.y,emitted.z);
+            //if emitted.x != 0.0{println!("{},{},{}\n",emitted.x,emitted.y,emitted.z);}
         if !rec_
             .mat_ptr
-            .scatter(r, &rec_, &mut attenuation, &mut scattered)
+            .scatter(r, &rec_, &mut attenuation, &mut scattered,&mut srec)
         {
             //println!("{},{},{}\n",attenuation.x,attenuation.y,attenuation.z);
             //return Vec3::cross(color(&scattered, world, depth - 1),attenuation);
@@ -262,10 +265,14 @@ pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<dyn H
             //     t.z * attenuation.z,
             // );
             //println!("1\n");
+            //println!("{},{},{}",emitted.x,emitted.y,emitted.z);
             return emitted;
             //return color(&scattered, background,world, depth - 1);
         }
-
+        if srec.is_specular{
+            let t = color(&srec.specular_ray,background,world,&lights.clone(),depth - 1);
+            return Vec3::new(srec.attenuation.x * t.x,srec.attenuation.y * t.y,srec.attenuation.z * t.z);
+        }
         // let on_light = Vec3::new(random_double2(213.0,343.0), 554.0, random_double2(227.0,332.0));
         // let mut to_light = on_light - rec_.p;
         // let distance_squared = to_light.len_squared();
@@ -296,21 +303,32 @@ pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<dyn H
         // scattered.time = r.time;
         // let pdf_value = light_pdf.value(&scattered.dir);
 
-        let p0 = Arc::new(HittablePdf::new(lights.clone(),rec_.p));
-        let p1 = Arc::new(CosinePdf::new(&rec_.normal));
-        let mixed_pdf = MixturePdf::new(p0,p1);
+        //  let p0 = Arc::new(HittablePdf::new(lights.clone(),rec_.p));
+        // let p1 = Arc::new(CosinePdf::new(&rec_.normal));
+        // let mixed_pdf = MixturePdf::new(p0,p1);
+        // scattered.orig = rec_.p;
+        // scattered.dir = mixed_pdf.generate();
+        // scattered.time = r.time;
+        // let pdf_value = mixed_pdf.value(&scattered.dir);
+
+        let light_ptr = Arc::new(HittablePdf::new(lights.clone(),rec_.p));
+        let p = MixturePdf::new(light_ptr,srec.pdf_ptr);
         scattered.orig = rec_.p;
-        scattered.dir = mixed_pdf.generate();
+        scattered.dir = p.generate();
         scattered.time = r.time;
-        let pdf_value = mixed_pdf.value(&scattered.dir);
+        let pdf_value = p.value(&scattered.dir);
+        // if pdf_value != 0.0 {
+        //     println!("{}",pdf_value);
+        // }
 
         //println!("2\n");
         let t = color(&scattered, background, world, &lights.clone(),depth - 1);
+        //println!("{},{},{}",srec.attenuation.x,srec.attenuation.y,srec.attenuation.z);
         return emitted
             + Vec3::new(
-                t.x * attenuation.x,
-                t.y * attenuation.y,
-                t.z * attenuation.z,
+                t.x * srec.attenuation.x,
+                t.y * srec.attenuation.y,
+                t.z * srec.attenuation.z,
             ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered) / pdf_value;
         
     
@@ -334,7 +352,7 @@ fn main() {
     //6
     const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 100;
+    const SAMPLES_PER_PIXEL: i32 = 1000;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -347,8 +365,10 @@ fn main() {
     let mut vfov = 20.0;
     let mut background = Vec3::zero();
 
-    let lights:Arc<dyn Hittable> = Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0))));
-
+    //let lights:Arc<dyn Hittable> = Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0))));
+     let mut lights = HittableList::new();
+     lights.add(Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
+     //lights.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
     let x = 5;
     if x == 0 {
         random_scene(&mut world);
@@ -472,12 +492,15 @@ fn main() {
         //     Vec3::new(430.0, 330.0, 460.0),
         //     red.clone(),
         // )));
-
-        let box1 = Arc::new(Box_::new(Vec3::zero(),Vec3::new(165.0,330.0,165.0),white.clone()));
+        let aluminum = Arc::new(Metal::new(Vec3::new(0.8,0.85,0.88),0.0));
+        let box1 = Arc::new(Box_::new(Vec3::zero(),Vec3::new(165.0,330.0,165.0),aluminum));
         let box1_ = Arc::new(RotateY::new(box1,15.0));
         let box1__ = Arc::new(Translate::new(box1_,Vec3::new(265.0,0.0,295.0)));
         //world.add(Arc::new(ConstantMedium::new1(box1__,0.01,Vec3::zero())));
         world.add(box1__);
+
+        // let glass = Arc::new(Dielectric::new(1.5));
+        // world.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,glass)));
         let box2 = Arc::new(Box_::new(Vec3::zero(),Vec3::new(165.0,165.0,165.0),white.clone()));
         let box2_ = Arc::new(RotateY::new(box2,-18.0));
         let box2__ = Arc::new(Translate::new(box2_,Vec3::new(130.0,0.0,65.0)));
@@ -577,11 +600,13 @@ fn main() {
                         let v = ((IMAGE_HEIGHT as u32 - y) as f64 - random_double(0.0, 100.0))
                             / ((IMAGE_HEIGHT - 1) as f64);
                         let r = cam.get_ray(u, v);
-                        pixel_color += color(&r, &background, &world_, &light,MAX_DEPTH);
+                        pixel_color += color(&r, &background, &world_, &Arc::new(light.clone()),MAX_DEPTH);
+                        //println!("{},{},{}\n",pixel_color.x,pixel_color.y,pixel_color.z);
                     }
                     let mut r = pixel_color.x;
                     let mut g = pixel_color.y;
                     let mut b = pixel_color.z;
+                    //println!("{},{},{}\n",r,b,g);
 
                     let scale = 1.0 / (SAMPLES_PER_PIXEL as f64);
                     r = (r * scale).sqrt();

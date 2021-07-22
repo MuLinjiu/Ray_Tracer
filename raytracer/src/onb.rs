@@ -32,7 +32,7 @@ impl Onb{
             a.x = 0.0;
             a.y = 1.0;
         }
-        let v = Vec3::cross(a, w).unit();
+        let v = Vec3::cross(w, a).unit();
         let u = Vec3::cross(w,v);
 
         Self{

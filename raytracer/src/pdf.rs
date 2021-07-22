@@ -77,6 +77,9 @@ impl MixturePdf{
 
 impl Pdf for MixturePdf{
     fn value(&self, direction:&Vec3) -> f64 {
+        // if 0.5 * self.p0.value(direction) + 0.5 * self.p1.value(direction) == 0.0{
+        //     println!()
+        // }
         return 0.5 * self.p0.value(direction) + 0.5 * self.p1.value(direction);
     }
 
@@ -86,5 +89,28 @@ impl Pdf for MixturePdf{
         }else {
             self.p1.generate()
         }
+    }
+}
+
+
+
+pub struct NonePdf{
+    pub val:f64,
+}
+
+impl NonePdf{
+    pub fn new() -> Self{
+        Self{
+            val:0.0,
+        }
+    }
+}
+
+impl Pdf for NonePdf{
+    fn value(&self, direction:&Vec3) -> f64 {
+        return 0.0;
+    }
+    fn generate(&self) -> Vec3 {
+        return Vec3::zero();
     }
 }

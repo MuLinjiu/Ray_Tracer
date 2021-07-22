@@ -1,7 +1,10 @@
+use std::f64::INFINITY;
 use std::f64::consts::PI;
 use std::sync::Arc;
 
 use crate::aabb::AABB;
+use crate::onb::Onb;
+use crate::rtweekend::random_double;
 use crate::vec3::Vec3;
 use crate::{
     hittable::{HitRecord, Hittable},
@@ -34,6 +37,13 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
+    fn pdf_value(&self, _o:&Vec3, _v:&Vec3) -> f64 {
+        if let Some(rec) = self.hit(&Ray::new(*_o,*_v,0.0), 0.0001, INFINITY){
+            let cos_theta_max = (1.0 - self.radius * self.radius / (self.center - *_o).squared_length()).sqrt();
+            let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
+            return 1.0 / solid_angle;
+        }0.0
+    }
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = HitRecord::new(
             Vec3::zero(),
@@ -79,6 +89,24 @@ impl Hittable for Sphere {
         );
         return Some(output);
     }
+
+    fn random(&self,_o:Vec3) -> Vec3{
+        let direction = self.center - _o;
+        let distance_squared = direction.len_squared();
+        let uvw = Onb::build_from_w(&direction);
+        return uvw.local1(&random_to_sphere(self.radius,distance_squared));
+
+    }
+}
+
+pub fn random_to_sphere(radius:f64,distance_squred:f64) -> Vec3{
+    let r1 = random_double(0.0, 100.0);
+    let r2 = random_double(0.0, 100.0);
+    let z = 1.0 + r2 * ((1.0 - radius * radius / distance_squred).sqrt() - 1.0);
+    let phi = 2.0 * PI * r1;
+    let x = phi.cos() * (1.0 - z * z).sqrt();
+    let y = phi.sin() * (1.0 - z * z).sqrt();
+    return Vec3::new(x,y,z);
 }
 
 pub struct MovingSphere {
