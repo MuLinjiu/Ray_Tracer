@@ -161,6 +161,7 @@ pub fn final_scene(world: &mut HittableList) {
         50.0,
         moving_sphere_material,
     )));
+  
 
     world.add(Arc::new(Sphere::new(
         Vec3::new(260.0, 150.0, 45.0),
@@ -184,6 +185,7 @@ pub fn final_scene(world: &mut HittableList) {
         0.2,
         Vec3::new(0.2, 0.4, 0.9),
     )));
+
     let boundary = Arc::new(Sphere::new(
         Vec3::zero(),
         5000.0,
@@ -194,6 +196,7 @@ pub fn final_scene(world: &mut HittableList) {
         0.0001,
         Vec3::ones(),
     )));
+
 
     let emat = Arc::new(Lambertian::new1(Arc::new(ImageTexture::new(
         "earthmap.jpg",
@@ -234,7 +237,7 @@ pub fn final_scene(world: &mut HittableList) {
     world.add(Arc::new(Translate::new(
         Arc::new(RotateY::new(tp, 15.0)),
         Vec3::new(-100.0, 270.0, 395.0),
-    )))
+    )));
 }
 
 pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<HittableList>,depth: i32) -> Vec3 {
@@ -324,6 +327,9 @@ pub fn color(r: &Ray, background: &Vec3, world: &dyn Hittable, lights:&Arc<Hitta
         //println!("2\n");
         let t = color(&scattered, background, world, &lights.clone(),depth - 1);
         //println!("{},{},{}",srec.attenuation.x,srec.attenuation.y,srec.attenuation.z);
+        // if rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered) == 0.0 {
+        //     println!("{}",rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered));
+        // }
         return emitted
             + Vec3::new(
                 t.x * srec.attenuation.x,
@@ -352,7 +358,7 @@ fn main() {
     //6
     const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 1000;
+    const SAMPLES_PER_PIXEL: i32 = 50;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -365,10 +371,25 @@ fn main() {
     let mut vfov = 20.0;
     let mut background = Vec3::zero();
 
+    //let light = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
+    // world.add(Arc::new(XzRect::new(
+    //     123.0, 423.0, 147.0, 412.0, 554.0, light,
+    // )));
     //let lights:Arc<dyn Hittable> = Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0))));
      let mut lights = HittableList::new();
-     lights.add(Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
-     //lights.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
+    //  lights.add(Arc::new(XzRect::new(
+    //     123.0, 423.0, 147.0, 412.0, 554.0, Arc::new(Metal::new(Vec3::zero(),0.0)),
+    // )));
+    //let light = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
+    // lights.add(Arc::new(XzRect::new(
+    //     123.0, 423.0, 147.0, 412.0, 554.0, light,
+    // )));
+     let light_ = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
+    lights.add(Arc::new(XzRect::new(
+        123.0, 423.0, 147.0, 412.0, 554.0, light_,
+    )));
+    //  lights.add(Arc::new(XzRect::new(213.0,343.0,227.0,332.0,554.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
+    //  lights.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
     let x = 5;
     if x == 0 {
         random_scene(&mut world);
@@ -612,17 +633,18 @@ fn main() {
                     r = (r * scale).sqrt();
                     g = (g * scale).sqrt();
                     b = (b * scale).sqrt();
+                   
                     //println!("{},{},{}\n",r,b,g);
-
-                    // if r != r {
-                    //     r = 0.0;
-                    // }
-                    // if g != g {
-                    //     g = 0.0;
-                    // }
-                    // if b != b {
-                    //     b = 0.0;
-                    // }
+                    if r != r {
+                        r = 0.0;
+                    }
+                    if g != g {
+                        g = 0.0;
+                    }
+                    if b != b {
+                        b = 0.0;
+                    }
+                     
                     let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
                     let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
                     let ib = (256.0 * clamp(b, 0.0, 0.999)) as u8;

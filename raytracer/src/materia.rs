@@ -289,8 +289,8 @@ impl Material for DiffuseLight {
            // println!("1");
             return self.emit.value(u, v, p);
         }
-        Vec3::zero()
-        //return self.emit.value(u, v, p);
+       // Vec3::zero()
+        self.emit.value(u, v, p)
     }
     fn scatter(
         &self,
