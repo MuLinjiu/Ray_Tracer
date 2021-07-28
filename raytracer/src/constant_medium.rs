@@ -136,7 +136,7 @@ impl Material for Isotropic {
         rec: &crate::hittable::HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut crate::Ray,
-        srec: &mut ScatterRecord,
+        _srec: &mut ScatterRecord,
     ) -> bool {
         //scattered = &mut Ray::new(rec.p, random_in_unit_sphere(), r_in.time);
         scattered.orig = rec.p;

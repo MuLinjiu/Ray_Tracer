@@ -68,8 +68,8 @@ impl Material for Metal {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Vec3,
-        scattered: &mut Ray,
+        _attenuation: &mut Vec3,
+        _scattered: &mut Ray,
         srec: &mut ScatterRecord,
     ) -> bool {
         let reflected = reflect(Vec3::unit(r_in.dir), rec.normal);
@@ -131,10 +131,10 @@ impl Material for Lambertian {
     }
     fn scatter(
         &self,
-        r_in: &Ray,
+        _r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Vec3,
-        scattered: &mut Ray,
+        _attenuation: &mut Vec3,
+        _scattered: &mut Ray,
         srec: &mut ScatterRecord,
     ) -> bool {
         // let uvw = Onb::build_from_w(&rec.normal.clone());
@@ -197,8 +197,8 @@ impl Material for Dielectric {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Vec3,
-        scattered: &mut Ray,
+        _attenuation: &mut Vec3,
+        _scattered: &mut Ray,
         srec: &mut ScatterRecord,
     ) -> bool {
         srec.is_specular = true;
@@ -287,7 +287,7 @@ impl Material for DiffuseLight {
         _rec: &HitRecord,
         _attenuation: &mut Vec3,
         _scattered: &mut Ray,
-        srec: &mut ScatterRecord,
+        _srec: &mut ScatterRecord,
     ) -> bool {
         return false;
     }

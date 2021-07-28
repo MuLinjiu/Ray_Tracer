@@ -95,7 +95,7 @@ impl NonePdf {
 }
 
 impl Pdf for NonePdf {
-    fn value(&self, direction: &Vec3) -> f64 {
+    fn value(&self, _direction: &Vec3) -> f64 {
         return 0.0;
     }
     fn generate(&self) -> Vec3 {

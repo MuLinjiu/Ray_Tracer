@@ -23,7 +23,7 @@ use camera::clamp;
 use image::{ImageBuffer, RgbImage};
 use indicatif::ProgressBar;
 use materia::ScatterRecord;
-use pdf::{CosinePdf, HittablePdf, MixturePdf, Pdf};
+use pdf::{HittablePdf, MixturePdf, Pdf};
 use rtweekend::random_double2;
 use sphere::MovingSphere;
 // use std::{f64::INFINITY, sync::{mpsc::channel, Arc}};
