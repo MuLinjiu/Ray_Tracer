@@ -2,8 +2,8 @@ use std::{f64::consts::PI, sync::Arc};
 
 //use crate::{Vec3, hittable::Hittable, materia::random_cosine_direction, onb::Onb, rtweekend::random_double};
 use crate::{
-        hittable::Hittable, materia::random_cosine_direction, onb::Onb, rtweekend::random_double, Vec3,
-    };
+    hittable::Hittable, materia::random_cosine_direction, onb::Onb, rtweekend::random_double, Vec3,
+};
 pub trait Pdf {
     fn value(&self, direction: &Vec3) -> f64;
     fn generate(&self) -> Vec3;
@@ -22,7 +22,7 @@ impl CosinePdf {
 }
 
 impl Pdf for CosinePdf {
-        fn value(&self, direction: &Vec3) -> f64 {
+    fn value(&self, direction: &Vec3) -> f64 {
         let cosine = Vec3::dot(direction.unit(), self.uvw.w);
 
         if cosine <= 0.0 {
@@ -40,14 +40,12 @@ impl Pdf for CosinePdf {
 pub struct HittablePdf {
     pub o: Vec3,
     pub ptr: Arc<dyn Hittable>,
+}
+
+impl HittablePdf {
+    pub fn new(p: Arc<dyn Hittable>, origin: Vec3) -> Self {
+        Self { ptr: p, o: origin }
     }
-
-    impl HittablePdf {
-        pub fn new(p: Arc<dyn Hittable>, origin: Vec3) -> Self {
-            Self { ptr: p, o: origin }
-        }
-
-
 }
 
 impl Pdf for HittablePdf {
@@ -59,8 +57,6 @@ impl Pdf for HittablePdf {
         return self.ptr.random(self.o);
     }
 }
-
-
 pub struct MixturePdf {
     p0: Arc<dyn Pdf>,
     p1: Arc<dyn Pdf>,
@@ -88,17 +84,14 @@ impl Pdf for MixturePdf {
         }
     }
 }
-
-
-
 pub struct NonePdf {
     pub val: f64,
 }
 
 impl NonePdf {
     pub fn new() -> Self {
-    Self { val: 0.0 }
-     }
+        Self { val: 0.0 }
+    }
 }
 
 impl Pdf for NonePdf {

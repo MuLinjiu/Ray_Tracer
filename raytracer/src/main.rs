@@ -7,8 +7,8 @@ mod constant_medium;
 mod hittable;
 mod hittable_list;
 mod materia;
-mod pdf;
 mod onb;
+mod pdf;
 mod perlin;
 mod ray;
 mod rtweekend;
@@ -28,27 +28,27 @@ use rtweekend::random_double2;
 use sphere::MovingSphere;
 // use std::{f64::INFINITY, sync::{mpsc::channel, Arc}};
 use std::{
-        f64::INFINITY,
-        sync::{mpsc::channel, Arc},
-    };
+    f64::INFINITY,
+    sync::{mpsc::channel, Arc},
+};
 use texture::CheckerTexture;
 
 use threadpool::ThreadPool;
 
 //use crate::{aarec::{RotateY, Translate, XyRect, XzRect, YzRect}, box_::Box_, camera::Camera, constant_medium::ConstantMedium, hittable::Hittable, hittable_list::HittableList, materia::{Dielectric, DiffuseLight, Lambertian, Metal}, onb::FlipFace, rtweekend::random_double, sphere::Sphere, texture::{ImageTexture, NoiseTexture}};
 use crate::{
-        aarec::{RotateY, Translate, XyRect, XzRect, YzRect},
-        box_::Box_,
-        camera::Camera,
-        constant_medium::ConstantMedium,
-        hittable::Hittable,
-        hittable_list::HittableList,
-        materia::{Dielectric, DiffuseLight, Lambertian, Metal},
-        onb::FlipFace,
-        rtweekend::random_double,
-        sphere::Sphere,
-        texture::{ImageTexture, NoiseTexture},
-    };
+    aarec::{RotateY, Translate, XyRect, XzRect, YzRect},
+    box_::Box_,
+    camera::Camera,
+    constant_medium::ConstantMedium,
+    hittable::Hittable,
+    hittable_list::HittableList,
+    materia::{Dielectric, DiffuseLight, Lambertian, Metal},
+    onb::FlipFace,
+    rtweekend::random_double,
+    sphere::Sphere,
+    texture::{ImageTexture, NoiseTexture},
+};
 pub use ray::Ray;
 pub use vec3::Vec3;
 
@@ -259,12 +259,12 @@ pub fn final_scene(world: &mut HittableList) {
 }
 
 pub fn color(
-        r: &Ray,
-        background: &Vec3,
-        world: &dyn Hittable,
-        lights: &Arc<HittableList>,
-        depth: i32,
-    ) -> Vec3 {    
+    r: &Ray,
+    background: &Vec3,
+    world: &dyn Hittable,
+    lights: &Arc<HittableList>,
+    depth: i32,
+) -> Vec3 {    
         if depth <= 0 {
         //println!("qq");
         return Vec3::zero();
@@ -297,19 +297,19 @@ pub fn color(
             //return color(&scattered, background,world, depth - 1);
         }
         if srec.is_specular {
-                        let t = color(
-                            &srec.specular_ray,
-                            background,
-                            world,
-                            &lights.clone(),
-                            depth - 1,
-                        );
-                        return Vec3::new(
-                            srec.attenuation.x * t.x,
-                            srec.attenuation.y * t.y,
-                            srec.attenuation.z * t.z,
-                        );
-        }
+            let t = color(
+                &srec.specular_ray,
+                    background,
+                    world,
+                    &lights.clone(),
+                    depth - 1,
+                );
+        return Vec3::new(
+                    srec.attenuation.x * t.x,
+                    srec.attenuation.y * t.y,
+                    srec.attenuation.z * t.z,
+                );
+            }
         // let on_light = Vec3::new(random_double2(213.0,343.0), 554.0, random_double2(227.0,332.0));
         // let mut to_light = on_light - rec_.p;
         // let distance_squared = to_light.len_squared();
@@ -370,7 +370,7 @@ pub fn color(
                 t.y * srec.attenuation.y,
                 t.z * srec.attenuation.z,
             ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered)
-                            / pdf_value;
+                / pdf_value;
         
     
     } else {
@@ -423,12 +423,12 @@ fn main() {
     //             554.0,
     //             Arc::new(Metal::new(Vec3::zero(), 0.0)),
     //         )));
-            //lights.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
+    //lights.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,Arc::new(Metal::new(Vec3::zero(),0.0)))));
     //let light = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
     // lights.add(Arc::new(XzRect::new(
     //     123.0, 423.0, 147.0, 412.0, 554.0, light,
     // )));
-     let light_ = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
+    let light_ = Arc::new(DiffuseLight::new1(Vec3::new(7.0, 7.0, 7.0)));
     lights.add(Arc::new(XzRect::new(
         123.0, 423.0, 147.0, 412.0, 554.0, light_,
     )));
@@ -472,7 +472,7 @@ fn main() {
     } else if x == 3 {
         lookfrom.x = 13.0;
         aperture = 0.0;
-        lookfrom = Vec3::new(20.0,20.0,20.0);
+        lookfrom = Vec3::new(20.0, 20.0, 20.0);
         let earth_texture = Arc::new(ImageTexture::new("earthmap.jpg"));
         //let earth_texture = Arc::new(image_texture::new("tjm.jpg"));
         let erath_surface = Arc::new(Lambertian::new1(earth_texture));
@@ -521,7 +521,6 @@ fn main() {
             0.0,
             red.clone(),
         )));
-        
         world.add(Arc::new(FlipFace::new(Arc::new(XzRect::new(
             123.0, 443.0, 127.0, 442.0, 554.0, light,
         )))));
@@ -574,12 +573,12 @@ fn main() {
         // let glass = Arc::new(Dielectric::new(1.5));
         // world.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,glass)));
         let box2 = Arc::new(Box_::new(
-                        Vec3::zero(),
-                        Vec3::new(165.0, 165.0, 165.0),
-                        white.clone(),
-                    ));
-                    let box2_ = Arc::new(RotateY::new(box2, -18.0));
-                    let box2__ = Arc::new(Translate::new(box2_, Vec3::new(130.0, 0.0, 65.0)));
+                Vec3::zero(),
+                Vec3::new(165.0, 165.0, 165.0),
+                white.clone(),
+            ));
+        let box2_ = Arc::new(RotateY::new(box2, -18.0));
+        let box2__ = Arc::new(Translate::new(box2_, Vec3::new(130.0, 0.0, 65.0)));
         world.add(box2__);
         //world.add(Arc::new(ConstantMedium::new1(box2__,0.01,Vec3::ones())));
 

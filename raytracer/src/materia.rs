@@ -9,8 +9,6 @@ use crate::ray::Ray;
 use crate::rtweekend::random_double;
 use crate::texture::{SolidColor, Texture};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
-
-
 pub fn random_cosine_direction() -> Vec3 {
     let r1 = random_double(0.0, 100.0);
     let r2 = random_double(0.0, 100.0);
@@ -34,8 +32,8 @@ pub trait Material: Send + Sync {
     ) -> bool;
 
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-                return 0.0;
-            }
+        return 0.0;
+    }
 
     fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         return 0.0;
@@ -94,8 +92,8 @@ impl Material for Metal {
     }
 
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-                return 0.0;
-            }
+        return 0.0;
+    }
 
     fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         return 0.0;
@@ -115,7 +113,6 @@ impl Lambertian {
     pub fn new1(a: Arc<dyn Texture>) -> Self {
         Self { albedo: a }
     }
-
 }
 
 impl Material for Lambertian {
@@ -125,11 +122,11 @@ impl Material for Lambertian {
         //let scatter_direction = rec.normal.clone() + random_in_unit_sphere();
         //scattered = &Ray::new(rec.p, scatter_direction);
         //scattered.orig = rec.p;
-        //scattered.dir = 
+        //scattered.dir =
 
         Vec3::dot(uvw.w, direction.unit()) / PI
     }
-    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -147,8 +144,7 @@ impl Material for Lambertian {
         // scattered.orig = rec.p;
         // scattered.dir = direction.unit();
         // scattered.time = r_in.time;
-        
-        
+
         //attenuation = &self.albedo;
         // attenuation.x = self.albedo.x;
         // attenuation.y = self.albedo.y;
@@ -156,7 +152,6 @@ impl Material for Lambertian {
         // attenuation.x = self.albedo.value(rec.u, rec.v, &rec.p).x;
         // attenuation.y = self.albedo.value(rec.u, rec.v, &rec.p).y;
         // attenuation.z = self.albedo.value(rec.u, rec.v, &rec.p).z;
-
 
         srec.is_specular = false;
         srec.attenuation.x = self.albedo.value(rec.u, rec.v, &rec.p).x;
@@ -279,11 +274,11 @@ impl DiffuseLight {
 
 impl Material for DiffuseLight {
     fn emitted(&self, _r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3 {
-            if rec.front_face {
-           // println!("1");
+        if rec.front_face {
+            // println!("1");
             return self.emit.value(u, v, p);
         }
-       // Vec3::zero()
+        // Vec3::zero()
         self.emit.value(u, v, p)
     }
     fn scatter(
@@ -301,11 +296,11 @@ impl Material for DiffuseLight {
 #[derive(Clone)]
 
 pub struct ScatterRecord {
-        pub specular_ray: Ray,
-        pub is_specular: bool,
-        pub attenuation: Vec3,
-        pub pdf_ptr: Arc<dyn Pdf>,
-    }
+    pub specular_ray: Ray,
+    pub is_specular: bool,
+    pub attenuation: Vec3,
+    pub pdf_ptr: Arc<dyn Pdf>,
+}
 
     impl ScatterRecord {
             pub fn new() -> Self {

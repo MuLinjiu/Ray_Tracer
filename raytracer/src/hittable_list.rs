@@ -3,12 +3,12 @@ use std::sync::Arc;
 // use crate::{Ray, aabb::AABB, hittable::{HitRecord, Hittable}, rtweekend::random_int, vec3::Vec3};
 
 use crate::{
-        aabb::AABB,
-        hittable::{HitRecord, Hittable},
-        rtweekend::random_int,
-        vec3::Vec3,
-        Ray,
-    };
+    aabb::AABB,
+    hittable::{HitRecord, Hittable},
+    rtweekend::random_int,
+    vec3::Vec3,
+    Ray,
+};
 
 #[allow(clippy::float_cmp)]
 #[derive(Clone)]

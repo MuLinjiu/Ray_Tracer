@@ -2,12 +2,11 @@ use std::sync::Arc;
 
 use crate::{hittable::Hittable, Vec3};
 
-
 pub struct Onb {
-        pub u: Vec3,
-        pub v: Vec3,
-        pub w: Vec3,
-    } 
+    pub u: Vec3,
+    pub v: Vec3,
+    pub w: Vec3,
+} 
 
 impl Onb {
     // pub fn new() -> Self{
@@ -38,19 +37,14 @@ impl Onb {
         Self { u, v, w }
     }
 }
-
-
 pub struct FlipFace {
-        ptr: Arc<dyn Hittable>,
+    ptr: Arc<dyn Hittable>,
 }
 impl FlipFace {
-        pub fn new(p: Arc<dyn Hittable>) -> Self {
-            Self { ptr: p }
+    pub fn new(p: Arc<dyn Hittable>) -> Self {
+        Self { ptr: p }
     }
-
-
 }
-
 impl Hittable for FlipFace {
     fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<crate::hittable::HitRecord> {
         //let rec:HitRecord;
@@ -60,7 +54,6 @@ impl Hittable for FlipFace {
         }
         None
     }
-
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<crate::aabb::AABB> {
         self.ptr.bounding_box(time0, time1)
     }
