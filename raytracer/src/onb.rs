@@ -6,7 +6,7 @@ pub struct Onb {
     pub u: Vec3,
     pub v: Vec3,
     pub w: Vec3,
-} 
+}
 
 impl Onb {
     // pub fn new() -> Self{

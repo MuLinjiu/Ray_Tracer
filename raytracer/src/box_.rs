@@ -78,7 +78,6 @@ impl Box_ {
 }
 
 impl Hittable for Box_ {
-    
     fn hit(&self, r: &crate::Ray, t_min: f64, t_max: f64) -> Option<hittable::HitRecord> {
         return self.sides.hit(r, t_min, t_max);
     }

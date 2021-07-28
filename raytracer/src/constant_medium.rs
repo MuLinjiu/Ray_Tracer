@@ -1,8 +1,8 @@
 // use std::{f64::{INFINITY, consts::E}, sync::Arc};
 
 use std::{
-        f64::{consts::E, INFINITY},
-        sync::Arc,
+    f64::{consts::E, INFINITY},
+    sync::Arc,
 };
 
 // use crate::{Ray, Vec3, hittable::{HitRecord, Hittable}, materia::{Material, Metal, ScatterRecord}, rtweekend::random_double, texture::{SolidColor, Texture}, vec3::random_in_unit_sphere};

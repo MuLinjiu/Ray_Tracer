@@ -40,7 +40,7 @@ impl Hittable for Sphere {
     fn pdf_value(&self, _o: &Vec3, _v: &Vec3) -> f64 {
         if let Some(_rec) = self.hit(&Ray::new(*_o, *_v, 0.0), 0.0001, INFINITY) {
             let cos_theta_max =
-                    (1.0 - self.radius * self.radius / (self.center - *_o).squared_length()).sqrt();
+                (1.0 - self.radius * self.radius / (self.center - *_o).squared_length()).sqrt();
             let solid_angle = 2.0 * PI * (1.0 - cos_theta_max);
             return 1.0 / solid_angle;
         }
@@ -97,7 +97,6 @@ impl Hittable for Sphere {
         let distance_squared = direction.len_squared();
         let uvw = Onb::build_from_w(&direction);
         return uvw.local1(&random_to_sphere(self.radius, distance_squared));
-
     }
 }
 

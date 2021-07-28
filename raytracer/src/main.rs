@@ -179,7 +179,6 @@ pub fn final_scene(world: &mut HittableList) {
         50.0,
         moving_sphere_material,
     )));
-  
 
     world.add(Arc::new(Sphere::new(
         Vec3::new(260.0, 150.0, 45.0),
@@ -265,7 +264,7 @@ pub fn color(
     lights: &Arc<HittableList>,
     depth: i32,
 ) -> Vec3 {    
-        if depth <= 0 {
+    if depth <= 0 {
         //println!("qq");
         return Vec3::zero();
     }
@@ -299,17 +298,17 @@ pub fn color(
         if srec.is_specular {
             let t = color(
                 &srec.specular_ray,
-                    background,
-                    world,
-                    &lights.clone(),
-                    depth - 1,
-                );
-        return Vec3::new(
-                    srec.attenuation.x * t.x,
-                    srec.attenuation.y * t.y,
-                    srec.attenuation.z * t.z,
-                );
-            }
+                background,
+                world,
+                &lights.clone(),
+                depth - 1,
+            );
+            return Vec3::new(
+                srec.attenuation.x * t.x,
+                srec.attenuation.y * t.y,
+                srec.attenuation.z * t.z,
+            );
+        }
         // let on_light = Vec3::new(random_double2(213.0,343.0), 554.0, random_double2(227.0,332.0));
         // let mut to_light = on_light - rec_.p;
         // let distance_squared = to_light.len_squared();
@@ -330,9 +329,6 @@ pub fn color(
         // scattered.orig = rec_.p;
         // scattered.dir = to_light;
         // scattered.time = r.time;
-        
-
-        
 
         // let light_pdf = HittablePdf::new(lights.clone(),rec_.p);
         // scattered.orig = rec_.p;
@@ -371,8 +367,6 @@ pub fn color(
                 t.z * srec.attenuation.z,
             ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered)
                 / pdf_value;
-        
-    
     } else {
         // let unit_direction = Vec3::unit(r.dir);
         // let t = 0.5 * (unit_direction.y + 1.0);
@@ -573,10 +567,10 @@ fn main() {
         // let glass = Arc::new(Dielectric::new(1.5));
         // world.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,glass)));
         let box2 = Arc::new(Box_::new(
-                Vec3::zero(),
-                Vec3::new(165.0, 165.0, 165.0),
-                white.clone(),
-            ));
+            Vec3::zero(),
+            Vec3::new(165.0, 165.0, 165.0),
+            white.clone(),
+        ));
         let box2_ = Arc::new(RotateY::new(box2, -18.0));
         let box2__ = Arc::new(Translate::new(box2_, Vec3::new(130.0, 0.0, 65.0)));
         world.add(box2__);
@@ -676,12 +670,12 @@ fn main() {
                             / ((IMAGE_HEIGHT - 1) as f64);
                         let r = cam.get_ray(u, v);
                         pixel_color += color(
-                                                        &r,
-                                                        &background,
-                                                        &world_,
-                                                        &Arc::new(light.clone()),
-                                                        MAX_DEPTH,
-                                                    );
+                            &r,
+                            &background,
+                            &world_,
+                            &Arc::new(light.clone()),
+                            MAX_DEPTH,
+                        );
                         //println!("{},{},{}\n",pixel_color.x,pixel_color.y,pixel_color.z);
                     }
                     let mut r = pixel_color.x;
@@ -693,7 +687,7 @@ fn main() {
                     r = (r * scale).sqrt();
                     g = (g * scale).sqrt();
                     b = (b * scale).sqrt();
-                   
+
                     //println!("{},{},{}\n",r,b,g);
                     if r != r {
                         r = 0.0;
@@ -704,7 +698,7 @@ fn main() {
                     if b != b {
                         b = 0.0;
                     }
-                     
+
                     let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
                     let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
                     let ib = (256.0 * clamp(b, 0.0, 0.999)) as u8;
