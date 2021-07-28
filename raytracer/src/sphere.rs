@@ -31,8 +31,10 @@ impl Sphere {
         let temptheta = (-p.z) / p.x;
         let mut phi = (temptheta).atan();
         phi = phi + PI;
-        *u = *&mut (phi / (2.0 * PI));
-        *v = *&mut (theta / PI);
+        //*u = *&mut (phi / (2.0 * PI));
+        *u = phi / (2.0 * PI);
+        //*v = *&mut (theta / PI);
+        *v = theta / PI;
     }
 }
 

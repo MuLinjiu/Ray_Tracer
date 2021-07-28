@@ -317,7 +317,7 @@ impl RotateY {
             sin_theta: sintheta,
             cos_theta: costheta,
             hash_box: flag,
-            bbox: bbox,
+            bbox,
         }
     }
 }

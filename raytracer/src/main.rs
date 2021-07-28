@@ -386,7 +386,7 @@ fn main() {
     //6
     const IMAGE_WIDTH: i32 = 800;
     const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
-    const SAMPLES_PER_PIXEL: i32 = 10;
+    const SAMPLES_PER_PIXEL: i32 = 1;
 
     let mut lookfrom = Vec3::new(12.0, 2.0, 3.0);
     //let lookfrom = Vec3::new(15.0, 0.0, 12.0);
@@ -686,15 +686,15 @@ fn main() {
                     g = (g * scale).sqrt();
                     b = (b * scale).sqrt();
                     //println!("{},{},{}\n",r,b,g);
-                    if r != r {
-                        r = 0.0;
-                    }
-                    if g != g {
-                        g = 0.0;
-                    }
-                    if b != b {
-                        b = 0.0;
-                    }
+                    // if r != r {
+                    //     r = 0.0;
+                    // }
+                    // if g != g {
+                    //     g = 0.0;
+                    // }
+                    // if b != b {
+                    //     b = 0.0;
+                    // }
 
                     let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
                     let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
