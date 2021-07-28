@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use crate::hittable::HitRecord;
 
-use crate::onb::{Onb};
+use crate::onb::Onb;
 use crate::pdf::{CosinePdf, NonePdf, Pdf};
 use crate::ray::Ray;
 use crate::rtweekend::random_double;
@@ -11,7 +11,7 @@ use crate::texture::{SolidColor, Texture};
 use crate::vec3::{random_in_unit_sphere, reflect, refract, Vec3};
 
 
-pub fn random_cosine_direction() -> Vec3{
+pub fn random_cosine_direction() -> Vec3 {
     let r1 = random_double(0.0, 100.0);
     let r2 = random_double(0.0, 100.0);
     let z = (1.0 - r2).sqrt();
@@ -20,7 +20,7 @@ pub fn random_cosine_direction() -> Vec3{
     let x = phi.cos() * r2.sqrt();
     let y = phi.sin() * r2.sqrt();
 
-    Vec3::new(x,y,z)
+    Vec3::new(x, y, z)
 }
 
 pub trait Material: Send + Sync {
@@ -30,21 +30,18 @@ pub trait Material: Send + Sync {
         rec: &HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool;
 
-    fn scattering_pdf(&self,
-        _r_in: &Ray,
-        _rec: &HitRecord,
-        _scattered: &mut Ray,) -> f64{
-            return 0.0;
-        }
+    fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
+                return 0.0;
+            }
 
-    fn get_pdf_value(&self,_rec: &HitRecord,_scattered: &mut Ray) -> f64{
+    fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         return 0.0;
     }
 
-    fn emitted(&self, r_in:&Ray,rec:&HitRecord,u: f64, v: f64, p: &Vec3) -> Vec3;
+    fn emitted(&self, r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3;
 }
 #[derive(Clone, Debug, PartialEq, Copy)]
 pub struct Metal {
@@ -66,7 +63,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord,_u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         return Vec3::zero();
     }
     fn scatter(
@@ -75,7 +72,7 @@ impl Material for Metal {
         rec: &HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool {
         let reflected = reflect(Vec3::unit(r_in.dir), rec.normal);
         srec.specular_ray.orig = rec.p;
@@ -96,14 +93,11 @@ impl Material for Metal {
         //return Vec3::dot(scattered.dir, rec.normal) > 0.0;
     }
 
-    fn scattering_pdf(&self,
-        _r_in: &Ray,
-        _rec: &HitRecord,
-        _scattered: &mut Ray,) -> f64{
-            return 0.0;
-        }
+    fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
+                return 0.0;
+            }
 
-    fn get_pdf_value(&self,_rec: &HitRecord,_scattered: &mut Ray) -> f64{
+    fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         return 0.0;
     }
 }
@@ -125,7 +119,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn get_pdf_value(&self,rec: &HitRecord,_scattered: &mut Ray,) -> f64 {
+    fn get_pdf_value(&self, rec: &HitRecord, _scattered: &mut Ray) -> f64 {
         let uvw = Onb::build_from_w(&rec.normal.clone());
         let direction = uvw.local1(&random_cosine_direction());
         //let scatter_direction = rec.normal.clone() + random_in_unit_sphere();
@@ -133,7 +127,7 @@ impl Material for Lambertian {
         //scattered.orig = rec.p;
         //scattered.dir = 
 
-        Vec3::dot(uvw.w,direction.unit()) / PI
+        Vec3::dot(uvw.w, direction.unit()) / PI
     }
     fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
@@ -144,7 +138,7 @@ impl Material for Lambertian {
         rec: &HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool {
         // let uvw = Onb::build_from_w(&rec.normal.clone());
         // let direction = uvw.local1(&random_cosine_direction());
@@ -174,11 +168,11 @@ impl Material for Lambertian {
     }
 
     fn scattering_pdf(&self, _r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
-        let cosine = Vec3::dot(rec.normal,Vec3::unit(scattered.dir));
+        let cosine = Vec3::dot(rec.normal, Vec3::unit(scattered.dir));
         if cosine < 0.0 {
             //println!("cao");
             return 0.0;
-        }else {
+        } else {
             //println!("diao");
             return cosine / PI;
         }
@@ -201,7 +195,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
     fn scatter(
@@ -210,7 +204,7 @@ impl Material for Dielectric {
         rec: &HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool {
         srec.is_specular = true;
         srec.pdf_ptr = Arc::new(NonePdf::new());
@@ -284,8 +278,8 @@ impl DiffuseLight {
 }
 
 impl Material for DiffuseLight {
-    fn emitted(&self, _r_in:&Ray,rec:&HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3 {
-        if rec.front_face{
+    fn emitted(&self, _r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3 {
+            if rec.front_face {
            // println!("1");
             return self.emit.value(u, v, p);
         }
@@ -298,24 +292,25 @@ impl Material for DiffuseLight {
         _rec: &HitRecord,
         _attenuation: &mut Vec3,
         _scattered: &mut Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool {
         return false;
     }
 }
 
 #[derive(Clone)]
-pub struct ScatterRecord{
-    pub specular_ray:Ray,
-    pub is_specular:bool,
-    pub attenuation:Vec3,
-    pub pdf_ptr:Arc<dyn Pdf>,
-}
 
-impl ScatterRecord{
-    pub fn new() -> Self{
-        Self{
-            specular_ray:Ray::new(Vec3::zero(),Vec3::zero(),0.0),
+pub struct ScatterRecord {
+        pub specular_ray: Ray,
+        pub is_specular: bool,
+        pub attenuation: Vec3,
+        pub pdf_ptr: Arc<dyn Pdf>,
+    }
+
+    impl ScatterRecord {
+            pub fn new() -> Self {
+                Self {
+                    specular_ray: Ray::new(Vec3::zero(), Vec3::zero(), 0.0),
             is_specular: true,
             attenuation: Vec3::zero(),
             pdf_ptr: Arc::new(NonePdf::new()),

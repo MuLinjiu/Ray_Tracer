@@ -2,7 +2,7 @@ use std::{path::Path, sync::Arc};
 
 use crate::clamp;
 
-use image::GenericImageView;
+use image::{GenericImageView,};
 
 use crate::{perlin::Perlin, Vec3};
 

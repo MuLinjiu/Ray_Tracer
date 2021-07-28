@@ -1,6 +1,14 @@
 use std::sync::Arc;
 
-use crate::{Ray, aabb::AABB, hittable::{HitRecord, Hittable}, rtweekend::random_int, vec3::Vec3};
+// use crate::{Ray, aabb::AABB, hittable::{HitRecord, Hittable}, rtweekend::random_int, vec3::Vec3};
+
+use crate::{
+        aabb::AABB,
+        hittable::{HitRecord, Hittable},
+        rtweekend::random_int,
+        vec3::Vec3,
+        Ray,
+    };
 
 #[allow(clippy::float_cmp)]
 #[derive(Clone)]
@@ -20,18 +28,19 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn pdf_value(&self, _o:&Vec3, _v:&Vec3) -> f64 {
+    fn pdf_value(&self, _o: &Vec3, _v: &Vec3) -> f64 {
         let weight = 1.0 / self.objects.len() as f64;
         let mut sum = 0.0;
-        for object in self.objects.iter(){
+        for object in self.objects.iter() {
             //println!("{}"obje)
             sum += weight * object.pdf_value(_o, _v);
         }
         sum
     }
-    fn random(&self, _o:Vec3) -> Vec3 {
+    fn random(&self, _o: Vec3) -> Vec3 {
         let int_size = self.objects.len();
-        return self.objects[random_int(0, int_size as i32)as usize].random(_o);
+        //return self.objects[random_int(0, int_size as i32)as usize].random(_o);
+        return self.objects[random_int(0, int_size as i32) as usize].random(_o);
     }
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = None;

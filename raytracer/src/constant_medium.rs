@@ -1,6 +1,20 @@
-use std::{f64::{INFINITY, consts::E}, sync::Arc};
+// use std::{f64::{INFINITY, consts::E}, sync::Arc};
 
-use crate::{Ray, Vec3, hittable::{HitRecord, Hittable}, materia::{Material, Metal, ScatterRecord}, rtweekend::random_double, texture::{SolidColor, Texture}, vec3::random_in_unit_sphere};
+use std::{
+        f64::{consts::E, INFINITY},
+        sync::Arc,
+    };
+
+// use crate::{Ray, Vec3, hittable::{HitRecord, Hittable}, materia::{Material, Metal, ScatterRecord}, rtweekend::random_double, texture::{SolidColor, Texture}, vec3::random_in_unit_sphere};
+
+use crate::{
+        hittable::{HitRecord, Hittable},
+        materia::{Material, Metal, ScatterRecord},
+        rtweekend::random_double,
+        texture::{SolidColor, Texture},
+        vec3::random_in_unit_sphere,
+        Ray, Vec3,
+    };
 
 pub struct ConstantMedium {
     boundary: Arc<dyn Hittable>,
@@ -122,7 +136,7 @@ impl Material for Isotropic {
         rec: &crate::hittable::HitRecord,
         attenuation: &mut Vec3,
         scattered: &mut crate::Ray,
-        srec:&mut ScatterRecord,
+        srec: &mut ScatterRecord,
     ) -> bool {
         //scattered = &mut Ray::new(rec.p, random_in_unit_sphere(), r_in.time);
         scattered.orig = rec.p;
@@ -134,7 +148,7 @@ impl Material for Isotropic {
         true
     }
 
-    fn emitted(&self, _r_in:&Ray,_rec:&HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
+    fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
         Vec3::zero()
     }
 }
