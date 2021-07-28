@@ -568,8 +568,8 @@ fn main() {
         ));
         let box1_ = Arc::new(RotateY::new(box1, 15.0));
         let box1__ = Arc::new(Translate::new(box1_, Vec3::new(265.0, 0.0, 295.0)));
-        world.add(Arc::new(ConstantMedium::new1(box1__,0.01,Vec3::zero())));
-        //world.add(box1__);
+        //world.add(Arc::new(ConstantMedium::new1(box1__,0.01,Vec3::zero())));
+        world.add(box1__);
 
         // let glass = Arc::new(Dielectric::new(1.5));
         // world.add(Arc::new(Sphere::new(Vec3::new(190.0,90.0,190.0),90.0,glass)));
@@ -580,8 +580,8 @@ fn main() {
                     ));
                     let box2_ = Arc::new(RotateY::new(box2, -18.0));
                     let box2__ = Arc::new(Translate::new(box2_, Vec3::new(130.0, 0.0, 65.0)));
-        //world.add(box2__);
-        world.add(Arc::new(ConstantMedium::new1(box2__,0.01,Vec3::ones())));
+        world.add(box2__);
+        //world.add(Arc::new(ConstantMedium::new1(box2__,0.01,Vec3::ones())));
 
         background = Vec3::zero();
         lookfrom.x = 278.0;
