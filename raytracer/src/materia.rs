@@ -302,14 +302,13 @@ pub struct ScatterRecord {
     pub pdf_ptr: Arc<dyn Pdf>,
 }
 
-    impl ScatterRecord {
-            pub fn new() -> Self {
-                Self {
-                    specular_ray: Ray::new(Vec3::zero(), Vec3::zero(), 0.0),
+impl ScatterRecord {
+    pub fn new() -> Self {
+        Self {
+            specular_ray: Ray::new(Vec3::zero(), Vec3::zero(), 0.0),
             is_specular: true,
             attenuation: Vec3::zero(),
             pdf_ptr: Arc::new(NonePdf::new()),
-            
         }
     }
 }

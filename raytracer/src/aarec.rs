@@ -45,10 +45,10 @@ impl Hittable for XyRect {
     }
 
     fn random(&self, o: Vec3) -> Vec3 {
-            let random_point = Vec3::new(
-                random_double2(self.x0, self.x1),
-                random_double2(self.y0, self.y1),
-                self.k,
+        let random_point = Vec3::new(
+            random_double2(self.x0, self.x1),
+            random_double2(self.y0, self.y1),
+            self.k,
         );
         random_point - o
     }

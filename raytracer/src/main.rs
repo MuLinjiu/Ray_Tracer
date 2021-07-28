@@ -214,7 +214,6 @@ pub fn final_scene(world: &mut HittableList) {
         Vec3::ones(),
     )));
 
-
     let emat = Arc::new(Lambertian::new1(Arc::new(ImageTexture::new(
         "earthmap.jpg",
     ))));
@@ -263,7 +262,7 @@ pub fn color(
     world: &dyn Hittable,
     lights: &Arc<HittableList>,
     depth: i32,
-) -> Vec3 {    
+) -> Vec3 {
     if depth <= 0 {
         //println!("qq");
         return Vec3::zero();
@@ -682,12 +681,10 @@ fn main() {
                     let mut g = pixel_color.y;
                     let mut b = pixel_color.z;
                     //println!("{},{},{}\n",r,b,g);
-
                     let scale = 1.0 / (SAMPLES_PER_PIXEL as f64);
                     r = (r * scale).sqrt();
                     g = (g * scale).sqrt();
                     b = (b * scale).sqrt();
-
                     //println!("{},{},{}\n",r,b,g);
                     if r != r {
                         r = 0.0;
