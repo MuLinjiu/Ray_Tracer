@@ -34,10 +34,10 @@ impl Onb {
         let v1 = Vec3::cross(w1, a1).unit();
         let u1 = Vec3::cross(w1, v1);
 
-        Self { 
-            u: u1, 
-            v: v1, 
-            w: w1 
+        Self {
+            u: u1,
+            v: v1,
+            w: w1
         }
     }
 }
