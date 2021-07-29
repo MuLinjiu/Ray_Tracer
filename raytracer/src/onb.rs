@@ -24,17 +24,21 @@ impl Onb {
         self.u * a.x + self.v * a.y + self.w * a.z
     }
 
-    pub fn build_from_w(n: &Vec3) -> Self {
-        let w = n.unit();
-        let mut a = Vec3::new(1.0, 0.0, 1.0);
-        if w.x.abs() > 0.9 {
-            a.x = 0.0;
-            a.y = 1.0;
+    pub fn build_from_w(n1: &Vec3) -> Self {
+        let w1 = n1.unit();
+        let mut a1 = Vec3::new(1.0, 0.0, 1.0);
+        if w1.x.abs() > 0.9 {
+            a1.x = 0.0;
+            a1.y = 1.0;
         }
-        let v = Vec3::cross(w, a).unit();
-        let u = Vec3::cross(w, v);
+        let v1 = Vec3::cross(w1, a1).unit();
+        let u1 = Vec3::cross(w1, v1);
 
-        Self { u, v, w }
+        Self { 
+            u: u1, 
+            v: v1, 
+            w: w1 
+        }
     }
 }
 pub struct FlipFace {
