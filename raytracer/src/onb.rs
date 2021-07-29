@@ -37,7 +37,7 @@ impl Onb {
         Self {
             u: u1,
             v: v1,
-            w: w1
+            w: w1,
         }
     }
 }
