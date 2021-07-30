@@ -148,6 +148,7 @@ impl MovingSphere {
 }
 
 impl Hittable for MovingSphere {
+    #[allow(clippy::suspicious_operation_groupings)]
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = HitRecord::new(
             Vec3::zero(),

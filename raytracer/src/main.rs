@@ -375,6 +375,7 @@ pub fn color(
         return background.clone();
     }
 }
+#[allow(clippy::many_single_char_names)]
 fn main() {
     const MAX_DEPTH: i32 = 50;
     //const ASPECT_RATIO: f64 = 16.0 / 9.0;
