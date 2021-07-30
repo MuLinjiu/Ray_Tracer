@@ -53,7 +53,7 @@ impl Perlin {
             p[target as usize] = tmp;
         }
     }
-
+    #[allow(clippy::many_single_char_names)]
     pub fn noise(&self, p: Vec3) -> f64 {
         let i = p.x.floor() as i32;
         let j = p.y.floor() as i32;

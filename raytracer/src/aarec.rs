@@ -259,6 +259,14 @@ impl Hittable for Translate {
         }
         None
     }
+
+    fn pdf_value(&self, _o: &Vec3, _v: &Vec3) -> f64 {
+        self.ptr.pdf_value(&(*_o - self.offset), _v)
+    }
+
+    fn random(&self, _o: Vec3) -> Vec3 {
+        self.ptr.random(_o - self.offset)
+    }
 }
 
 pub struct RotateY {

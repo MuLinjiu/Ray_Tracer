@@ -1,3 +1,4 @@
+#[deny(clippy::float_cmp)]
 mod aabb;
 mod aarec;
 mod box_;
@@ -374,7 +375,6 @@ pub fn color(
         return background.clone();
     }
 }
-
 fn main() {
     const MAX_DEPTH: i32 = 50;
     //const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -686,15 +686,15 @@ fn main() {
                     g = (g * scale).sqrt();
                     b = (b * scale).sqrt();
                     //println!("{},{},{}\n",r,b,g);
-                    if r != r {
-                        r = 0.0;
-                    }
-                    if g != g {
-                        g = 0.0;
-                    }
-                    if b != b {
-                        b = 0.0;
-                    }
+                    // if r != r {
+                    //     r = 0.0;
+                    // }
+                    // if g != g {
+                    //     g = 0.0;
+                    // }
+                    // if b != b {
+                    //     b = 0.0;
+                    // }
 
                     let ir = (256.0 * clamp(r, 0.0, 0.999)) as u8;
                     let ig = (256.0 * clamp(g, 0.0, 0.999)) as u8;
