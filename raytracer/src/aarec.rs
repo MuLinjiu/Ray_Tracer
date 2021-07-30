@@ -35,10 +35,10 @@ impl XyRect {
 impl Hittable for XyRect {
     fn pdf_value(&self, o: &Vec3, v: &Vec3) -> f64 {
         //let rec;
-        if let Some(rec) = self.hit(&Ray::new(o.clone(), v.clone(), 0.0), 0.001, INFINITY) {
+        if let Some(rec) = self.hit(&Ray::new(*o, *v, 0.0), 0.001, INFINITY) {
             let area = (self.x1 - self.x0) * (self.y1 - self.y0);
             let distance_squared = rec.t * rec.t * v.squared_length();
-            let cosine = Vec3::dot(v.clone(), rec.normal).abs() / v.len();
+            let cosine = Vec3::dot(*v, rec.normal).abs() / v.len();
             return distance_squared / (cosine * area);
         }
         0.0
@@ -70,7 +70,7 @@ impl Hittable for XyRect {
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = self.mp.clone();
         rec.p = r.at(t);
-        return Some(rec);
+        Some(rec)
     }
 
     fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<crate::aabb::AABB> {
@@ -106,10 +106,10 @@ impl XzRect {
 impl Hittable for XzRect {
     fn pdf_value(&self, o: &Vec3, v: &Vec3) -> f64 {
         //let rec;
-        if let Some(rec) = self.hit(&Ray::new(o.clone(), v.clone(), 0.0), 0.001, INFINITY) {
+        if let Some(rec) = self.hit(&Ray::new(*o, *v, 0.0), 0.001, INFINITY) {
             let area = (self.x1 - self.x0) * (self.z1 - self.z0);
             let distance_squared = rec.t * rec.t * v.squared_length();
-            let cosine = Vec3::dot(v.clone(), rec.normal).abs() / v.len();
+            let cosine = Vec3::dot(*v, rec.normal).abs() / v.len();
             return distance_squared / (cosine * area);
         }
         0.0
@@ -142,7 +142,7 @@ impl Hittable for XzRect {
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = self.mp.clone();
         rec.p = r.at(t);
-        return Some(rec);
+        Some(rec)
     }
 
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<crate::aabb::AABB> {
@@ -178,10 +178,10 @@ impl YzRect {
 impl Hittable for YzRect {
     fn pdf_value(&self, o: &Vec3, v: &Vec3) -> f64 {
         //let rec;
-        if let Some(rec) = self.hit(&Ray::new(o.clone(), v.clone(), 0.0), 0.001, INFINITY) {
+        if let Some(rec) = self.hit(&Ray::new(*o, *v, 0.0), 0.001, INFINITY) {
             let area = (self.y1 - self.y0) * (self.z1 - self.z0);
             let distance_squared = rec.t * rec.t * v.squared_length();
-            let cosine = Vec3::dot(v.clone(), rec.normal).abs() / v.len();
+            let cosine = Vec3::dot(*v, rec.normal).abs() / v.len();
             return distance_squared / (cosine * area);
         }
         0.0
@@ -214,7 +214,7 @@ impl Hittable for YzRect {
         rec.set_face_normal(r, outward_normal);
         rec.mat_ptr = self.mp.clone();
         rec.p = r.at(t);
-        return Some(rec);
+        Some(rec)
     }
 
     fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<crate::aabb::AABB> {
@@ -247,7 +247,7 @@ impl Hittable for Translate {
             rec.set_face_normal(&moved_r, rec.normal);
             return Some(rec);
         }
-        return None;
+        None
     }
 
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
@@ -286,12 +286,12 @@ impl RotateY {
         let hashbox_ = p.bounding_box(0.0, 1.0);
         let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
         if let Some(bbbox) = hashbox_ {
-            bbox = bbbox.clone();
+            bbox = bbbox;
             flag = true;
         }
 
         let mut min = Vec3::new(INFINITY, INFINITY, INFINITY);
-        let mut max = -min.clone();
+        let mut max = -min;
 
         for i in 0..2 {
             for j in 0..2 {

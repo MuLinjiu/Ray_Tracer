@@ -32,11 +32,11 @@ pub trait Material: Send + Sync {
     ) -> bool;
 
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-        return 0.0;
+        0.0
     }
 
     fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-        return 0.0;
+        0.0
     }
 
     fn emitted(&self, r_in: &Ray, rec: &HitRecord, u: f64, v: f64, p: &Vec3) -> Vec3;
@@ -62,7 +62,7 @@ impl Metal {
 
 impl Material for Metal {
     fn emitted(&self, _r_in: &Ray, _rec: &HitRecord, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
-        return Vec3::zero();
+        Vec3::zero()
     }
     fn scatter(
         &self,
@@ -86,17 +86,17 @@ impl Material for Metal {
         srec.attenuation.y = self.albedo.y;
         srec.attenuation.z = self.albedo.z;
         srec.pdf_ptr = Arc::new(NonePdf::new());
-        return true;
+        true
         //srec.pdf_ptr = 0;
         //return Vec3::dot(scattered.dir, rec.normal) > 0.0;
     }
 
     fn scattering_pdf(&self, _r_in: &Ray, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-        return 0.0;
+        0.0
     }
 
     fn get_pdf_value(&self, _rec: &HitRecord, _scattered: &mut Ray) -> f64 {
-        return 0.0;
+        0.0
     }
 }
 
@@ -159,17 +159,17 @@ impl Material for Lambertian {
         srec.attenuation.z = self.albedo.value(rec.u, rec.v, &rec.p).z;
         srec.pdf_ptr = Arc::new(CosinePdf::new(&rec.normal));
         //*pdf = Vec3::dot(rec.normal.clone(),scattered.dir.clone()) / PI;
-        return true;
+        true
     }
 
     fn scattering_pdf(&self, _r_in: &Ray, rec: &HitRecord, scattered: &mut Ray) -> f64 {
         let cosine = Vec3::dot(rec.normal, Vec3::unit(scattered.dir));
         if cosine < 0.0 {
             //println!("cao");
-            return 0.0;
+            0.0
         } else {
             //println!("diao");
-            return cosine / PI;
+            cosine / PI
         }
     }
 }
@@ -177,7 +177,7 @@ impl Material for Lambertian {
 pub fn schlick(cosine: f64, ref_idx: f64) -> f64 {
     let mut r0: f64 = (1.0 - ref_idx) / (1.0 + ref_idx);
     r0 *= r0;
-    return r0 + (1.0 - r0) * f64::powf(1.0 - cosine, 5.0);
+    r0 + (1.0 - r0) * f64::powf(1.0 - cosine, 5.0)
 }
 pub struct Dielectric {
     ref_idx: f64,
@@ -252,7 +252,7 @@ impl Material for Dielectric {
         // scattered.orig = rec.p;
         // scattered.dir = refracted;
         // scattered.time = r_in.time;
-        return true;
+        true
     }
 }
 
@@ -289,7 +289,7 @@ impl Material for DiffuseLight {
         _scattered: &mut Ray,
         _srec: &mut ScatterRecord,
     ) -> bool {
-        return false;
+        false
     }
 }
 
@@ -303,6 +303,7 @@ pub struct ScatterRecord {
 }
 
 impl ScatterRecord {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             specular_ray: Ray::new(Vec3::zero(), Vec3::zero(), 0.0),

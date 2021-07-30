@@ -9,17 +9,17 @@ pub struct AABB {
 
 pub fn fmin(a: f64, b: f64) -> f64 {
     if a < b {
-        return a;
+        a
     } else {
-        return b;
+        b
     }
 }
 
 pub fn fmax(a: f64, b: f64) -> f64 {
     if a > b {
-        return a;
+        a
     } else {
-        return b;
+        b
     }
 }
 
@@ -54,9 +54,10 @@ impl AABB {
             let mut t0 = (self.minmum.get(a) - r.orig.get(a)) * inv_d;
             let mut t1 = (self.maxmum.get(a) - r.orig.get(a)) * inv_d;
             if inv_d < 0.0 {
-                let mid = t0;
-                t0 = t1;
-                t1 = mid;
+                // let mid = t0;
+                // t0 = t1;
+                // t1 = mid;
+                std::mem::swap(&mut t0, &mut t1)
             }
             //println!("{},{}\n",t0,t1);
             let ans1 = fmax(t0, t_min);

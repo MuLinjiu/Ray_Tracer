@@ -1,3 +1,5 @@
+use std::f64::consts::PI;
+
 use crate::rtweekend::random_double2;
 use crate::vec3::Vec3;
 use crate::{ray::Ray, vec3::random_in_unit_disk};
@@ -16,6 +18,7 @@ pub struct Camera {
 }
 
 impl Camera {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         lookfrom: Vec3,
         lookat: Vec3,
@@ -58,16 +61,16 @@ impl Camera {
     pub fn get_ray(self, s: f64, t: f64) -> Ray {
         let rd = random_in_unit_disk() * self.lens_radius;
         let offset = self.u * rd.x + self.v * rd.y;
-        return Ray::new(
+        Ray::new(
             self.origin + offset,
             self.lower_left_corner + self.horizontal * s + self.vertical * t - self.origin - offset,
             random_double2(self._time0, self._time1),
-        );
+        )
     }
 }
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
-    return degrees * 3.1415926535897932385 / 180.0;
+    degrees * PI / 180.0
 }
 
 pub fn clamp(x: f64, min: f64, max: f64) -> f64 {

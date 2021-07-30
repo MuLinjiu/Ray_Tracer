@@ -38,13 +38,13 @@ impl Hittable for BVHNODE {
 
 impl BVHNODE {
     pub fn new(
-        src_objects: &Vec<Arc<dyn Hittable>>,
+        src_objects: &[Arc<dyn Hittable>],
         start: usize,
         end: usize,
         time0: f64,
         time1: f64,
     ) -> Self {
-        let mut objects = src_objects.clone();
+        let mut objects = src_objects.to_owned();
         let axis = random_int(0, 10000) % 3;
         let left;
         let right;

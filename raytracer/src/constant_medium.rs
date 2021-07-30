@@ -42,7 +42,7 @@ impl ConstantMedium {
 
 impl Hittable for ConstantMedium {
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<crate::aabb::AABB> {
-        return self.boundary.bounding_box(time0, time1);
+        self.boundary.bounding_box(time0, time1)
     }
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<crate::hittable::HitRecord> {
         // let mut rec1 = hit_record::new(
@@ -62,12 +62,12 @@ impl Hittable for ConstantMedium {
         // );
         let mut rec2;
         if let Some(rec1_) = self.boundary.hit(r, -INFINITY, INFINITY) {
-            rec1 = rec1_.clone();
+            rec1 = rec1_;
         } else {
             return None;
         }
         if let Some(rec2_) = self.boundary.hit(r, rec1.t + 0.0001, INFINITY) {
-            rec2 = rec2_.clone();
+            rec2 = rec2_;
         } else {
             return None;
         }

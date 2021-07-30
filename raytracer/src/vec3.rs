@@ -15,11 +15,11 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn get(&self, axis: i32) -> f64 {
         if axis == 0 {
-            return self.x;
+            self.x
         } else if axis == 1 {
-            return self.y;
+            self.y
         } else {
-            return self.z;
+            self.z
         }
     }
     pub fn new(x: f64, y: f64, z: f64) -> Self {
@@ -230,7 +230,7 @@ pub fn refract(uv: Vec3, n: Vec3, etai_over_etat: f64) -> Vec3 {
     let cos_theta = Vec3::dot(-uv, n);
     let r_out_perp = (uv + n * cos_theta) * etai_over_etat;
     let r_out_parallel = n * (-((1.0 - r_out_perp.len_squared()).abs()).sqrt());
-    return r_out_parallel + r_out_perp;
+    r_out_parallel + r_out_perp
 }
 
 impl Neg for Vec3 {

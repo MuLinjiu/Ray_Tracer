@@ -21,8 +21,8 @@ pub struct Sphere {
 impl Sphere {
     pub fn new(center: Vec3, radius: f64, mat_ptr: Arc<dyn Material>) -> Self {
         Self {
-            center,
             radius,
+            center,
             mat_ptr,
         }
     }
@@ -30,7 +30,7 @@ impl Sphere {
         let theta = (-p.y).acos();
         let temptheta = (-p.z) / p.x;
         let mut phi = (temptheta).atan();
-        phi = phi + PI;
+        phi += PI;
         //*u = *&mut (phi / (2.0 * PI));
         *u = phi / (2.0 * PI);
         //*v = *&mut (theta / PI);
@@ -85,21 +85,21 @@ impl Hittable for Sphere {
                 return Some(rec);
             }
         }
-        return None;
+        None
     }
     fn bounding_box(&self, _time0: f64, _time1: f64) -> Option<AABB> {
         let output = AABB::new(
             self.center - Vec3::new(self.radius, self.radius, self.radius),
             self.center + Vec3::new(self.radius, self.radius, self.radius),
         );
-        return Some(output);
+        Some(output)
     }
 
     fn random(&self, _o: Vec3) -> Vec3 {
         let direction = self.center - _o;
         let distance_squared = direction.len_squared();
         let uvw = Onb::build_from_w(&direction);
-        return uvw.local1(&random_to_sphere(self.radius, distance_squared));
+        uvw.local1(&random_to_sphere(self.radius, distance_squared))
     }
 }
 
@@ -110,7 +110,7 @@ pub fn random_to_sphere(radius: f64, distance_squred: f64) -> Vec3 {
     let phi = 2.0 * PI * r1;
     let x = phi.cos() * (1.0 - z * z).sqrt();
     let y = phi.sin() * (1.0 - z * z).sqrt();
-    return Vec3::new(x, y, z);
+    Vec3::new(x, y, z)
 }
 
 pub struct MovingSphere {
@@ -142,8 +142,8 @@ impl MovingSphere {
     }
 
     pub fn center(&self, time: f64) -> Vec3 {
-        return self.center0
-            + (self.center1 - self.center0) * (time - self.time0) / (self.time1 - self.time0);
+        self.center0
+            + (self.center1 - self.center0) * (time - self.time0) / (self.time1 - self.time0)
     }
 }
 
@@ -183,7 +183,7 @@ impl Hittable for MovingSphere {
                 return Some(rec);
             }
         }
-        return None;
+        None
     }
     fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
         let box0 = AABB::new(
@@ -195,7 +195,7 @@ impl Hittable for MovingSphere {
             self.center(time1) + Vec3::new(self.radius, self.radius, self.radius),
         );
         let output_box = AABB::surrounding_box(box0, box1);
-        return Some(output_box);
+        Some(output_box)
         //改成option
     }
 }

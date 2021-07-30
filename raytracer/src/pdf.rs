@@ -26,9 +26,9 @@ impl Pdf for CosinePdf {
         let cosine = Vec3::dot(direction.unit(), self.uvw.w);
 
         if cosine <= 0.0 {
-            return 0.0;
+            0.0
         } else {
-            return cosine / PI;
+            cosine / PI
         }
     }
 
@@ -50,11 +50,11 @@ impl HittablePdf {
 
 impl Pdf for HittablePdf {
     fn value(&self, direction: &Vec3) -> f64 {
-        return self.ptr.pdf_value(&self.o, direction);
+        self.ptr.pdf_value(&self.o, direction)
     }
 
     fn generate(&self) -> Vec3 {
-        return self.ptr.random(self.o);
+        self.ptr.random(self.o)
     }
 }
 pub struct MixturePdf {
@@ -73,12 +73,12 @@ impl Pdf for MixturePdf {
         // if 0.5 * self.p0.value(direction) + 0.5 * self.p1.value(direction) == 0.0{
         //     println!()
         // }
-        return 0.5 * self.p0.value(direction) + 0.5 * self.p1.value(direction);
+        0.5 * self.p0.value(direction) + 0.5 * self.p1.value(direction)
     }
 
     fn generate(&self) -> Vec3 {
         if random_double(0.0, 100.0) < 0.5 {
-            return self.p0.generate();
+            self.p0.generate()
         } else {
             self.p1.generate()
         }
@@ -96,9 +96,9 @@ impl NonePdf {
 
 impl Pdf for NonePdf {
     fn value(&self, _direction: &Vec3) -> f64 {
-        return 0.0;
+        0.0
     }
     fn generate(&self) -> Vec3 {
-        return Vec3::zero();
+        Vec3::zero()
     }
 }

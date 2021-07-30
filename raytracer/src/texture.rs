@@ -26,7 +26,7 @@ impl SolidColor {
 
 impl Texture for SolidColor {
     fn value(&self, _u: f64, _v: f64, _p: &Vec3) -> Vec3 {
-        return self.color_value;
+        self.color_value
     }
 }
 
@@ -65,9 +65,9 @@ impl Texture for CheckerTexture {
     fn value(&self, u: f64, v: f64, p: &Vec3) -> Vec3 {
         let sines = (10.0 * p.x).sin() * (10.0 * p.y).sin() * (10.0 * p.z).sin();
         if sines < 0.0 {
-            return self.odd.value(u, v, p);
+            self.odd.value(u, v, p)
         } else {
-            return self.even.value(u, v, p);
+            self.even.value(u, v, p)
         }
     }
 }
@@ -96,9 +96,9 @@ impl NoiseTexture {
 
 impl Texture for NoiseTexture {
     fn value(&self, _u: f64, _v: f64, p: &Vec3) -> Vec3 {
-        return Vec3::new(1.0, 1.0, 1.0)
+        Vec3::new(1.0, 1.0, 1.0)
             * 0.5
-            * (1.0 + (10.0 * self.noise.turb(*p, 7) + self.scare * p.z).sin());
+            * (1.0 + (10.0 * self.noise.turb(*p, 7) + self.scare * p.z).sin())
     }
 }
 
@@ -119,7 +119,7 @@ impl ImageTexture {
             width: im.dimensions().0 as i32,
             height: im.dimensions().1 as i32,
             bytes_per_scanline: 0,
-            data: im.clone(),
+            data: im,
         }
     }
 }

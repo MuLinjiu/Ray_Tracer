@@ -17,13 +17,14 @@ pub struct HittableList {
 }
 
 impl HittableList {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             objects: Vec::new(),
         }
     }
     pub fn add(&mut self, object: Arc<dyn Hittable>) {
-        &self.objects.push(object);
+        self.objects.push(object);
     }
 }
 
@@ -40,7 +41,7 @@ impl Hittable for HittableList {
     fn random(&self, _o: Vec3) -> Vec3 {
         let int_size = self.objects.len();
         //return self.objects[random_int(0, int_size as i32)as usize].random(_o);
-        return self.objects[random_int(0, int_size as i32) as usize].random(_o);
+        self.objects[random_int(0, int_size as i32) as usize].random(_o)
     }
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut rec = None;
@@ -48,7 +49,7 @@ impl Hittable for HittableList {
         for object in self.objects.iter() {
             let t = object.hit(r, t_min, closest_so_far);
             if let Some(rec_) = t {
-                let t = rec_.t.clone();
+                let t = rec_.t;
                 rec = Some(rec_);
                 closest_so_far = t;
             }

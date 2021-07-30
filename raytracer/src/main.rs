@@ -199,7 +199,7 @@ pub fn final_scene(world: &mut HittableList) {
     ));
     world.add(boundary.clone());
     world.add(Arc::new(ConstantMedium::new1(
-        boundary.clone(),
+        boundary,
         0.2,
         Vec3::new(0.2, 0.4, 0.9),
     )));
@@ -274,9 +274,9 @@ pub fn color(
         let mut attenuation = Vec3::zero();
         //let mut pdf = 0.0;
         let mut srec = ScatterRecord::new();
-        let emitted =
-            rec_.mat_ptr
-                .emitted(r, &rec_, rec_.u.clone(), rec_.v.clone(), &rec_.p.clone());
+        let emitted = rec_
+            .mat_ptr
+            .emitted(r, &rec_, rec_.u, rec_.v, &rec_.p.clone());
         //if emitted.x != 0.0{println!("{},{},{}\n",emitted.x,emitted.y,emitted.z);}
         if !rec_
             .mat_ptr
@@ -360,19 +360,19 @@ pub fn color(
         // if rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered) == 0.0 {
         //     println!("{}",rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered));
         // }
-        return emitted
+        emitted
             + Vec3::new(
                 t.x * srec.attenuation.x,
                 t.y * srec.attenuation.y,
                 t.z * srec.attenuation.z,
             ) * rec_.mat_ptr.scattering_pdf(r, &rec_, &mut scattered)
-                / pdf_value;
+                / pdf_value
     } else {
         // let unit_direction = Vec3::unit(r.dir);
         // let t = 0.5 * (unit_direction.y + 1.0);
         // Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
         //println!("3\n");
-        return background.clone();
+        *background
     }
 }
 #[allow(clippy::many_single_char_names)]
@@ -499,22 +499,8 @@ fn main() {
         let green = Arc::new(Lambertian::new(Vec3::new(0.12, 0.45, 0.15)));
         let light = Arc::new(DiffuseLight::new1(Vec3::new(15.0, 15.0, 15.0)));
 
-        world.add(Arc::new(YzRect::new(
-            0.0,
-            555.0,
-            0.0,
-            555.0,
-            555.0,
-            green.clone(),
-        )));
-        world.add(Arc::new(YzRect::new(
-            0.0,
-            555.0,
-            0.0,
-            555.0,
-            0.0,
-            red.clone(),
-        )));
+        world.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+        world.add(Arc::new(YzRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
         world.add(Arc::new(FlipFace::new(Arc::new(XzRect::new(
             123.0, 443.0, 127.0, 442.0, 554.0, light,
         )))));
@@ -569,7 +555,7 @@ fn main() {
         let box2 = Arc::new(Box_::new(
             Vec3::zero(),
             Vec3::new(165.0, 165.0, 165.0),
-            white.clone(),
+            white,
         ));
         let box2_ = Arc::new(RotateY::new(box2, -18.0));
         let box2__ = Arc::new(Translate::new(box2_, Vec3::new(130.0, 0.0, 65.0)));
