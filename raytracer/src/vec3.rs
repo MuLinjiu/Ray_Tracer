@@ -13,6 +13,15 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+    // pub fn sameside(a: Vec3, b: Vec3, c: Vec3, p: Vec3) -> bool {
+    //     let ab = b - a;
+    //     let ac = c - a;
+    //     let ap = p - a;
+
+    //     let v1 = Vec3::cross(ab, ac);
+    //     let v2 = Vec3::cross(ab, ap);
+    //     return Vec3::dot(v1, v2) >= 0.0;
+    // }
     pub fn get(&self, axis: i32) -> f64 {
         if axis == 0 {
             self.x

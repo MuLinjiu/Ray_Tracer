@@ -44,6 +44,7 @@ impl BVHNODE {
         time0: f64,
         time1: f64,
     ) -> Self {
+        //println!("{},{}",start,end);
         let mut objects = src_objects.to_owned();
         let axis = random_int(0, 10000) % 3;
         let left;
