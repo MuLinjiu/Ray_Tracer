@@ -29,7 +29,7 @@ use rtweekend::random_double2;
 use sphere::MovingSphere;
 // use std::{f64::INFINITY, sync::{mpsc::channel, Arc}};
 use std::{
-    f64::{INFINITY},
+    f64::INFINITY,
     sync::{mpsc::channel, Arc},
 };
 use texture::CheckerTexture;
