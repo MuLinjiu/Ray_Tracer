@@ -369,207 +369,207 @@ impl Hittable for RotateY {
     }
 }
 
-pub struct RotateZ {
-    pub ptr: Arc<dyn Hittable>,
-    pub sin_theta: f64,
-    pub cos_theta: f64,
-    pub hash_box: bool,
-    pub bbox: AABB,
-}
+// pub struct RotateZ {
+//     pub ptr: Arc<dyn Hittable>,
+//     pub sin_theta: f64,
+//     pub cos_theta: f64,
+//     pub hash_box: bool,
+//     pub bbox: AABB,
+// }
 
-impl RotateZ {
-    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
-        let radians = degrees_to_radians(angle);
-        let sintheta = radians.sin();
-        let costheta = radians.cos();
-        let mut flag = false;
-        let hashbox_ = p.bounding_box(0.0, 1.0);
-        let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(bbbox) = hashbox_ {
-            bbox = bbbox;
-            flag = true;
-        }
+// impl RotateZ {
+//     pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
+//         let radians = degrees_to_radians(angle);
+//         let sintheta = radians.sin();
+//         let costheta = radians.cos();
+//         let mut flag = false;
+//         let hashbox_ = p.bounding_box(0.0, 1.0);
+//         let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
+//         if let Some(bbbox) = hashbox_ {
+//             bbox = bbbox;
+//             flag = true;
+//         }
 
-        let mut min = Vec3::new(INFINITY, INFINITY, INFINITY);
-        let mut max = -min;
+//         let mut min = Vec3::new(INFINITY, INFINITY, INFINITY);
+//         let mut max = -min;
 
-        for i in 0..2 {
-            for j in 0..2 {
-                for k in 0..2 {
-                    let x = i as f64 * bbox.maxmum.x + (1 - i) as f64 * bbox.minmum.x;
-                    let y = j as f64 * bbox.maxmum.y + (1 - j) as f64 * bbox.minmum.y;
-                    let z = k as f64 * bbox.maxmum.z + (1 - k) as f64 * bbox.minmum.z;
+//         for i in 0..2 {
+//             for j in 0..2 {
+//                 for k in 0..2 {
+//                     let x = i as f64 * bbox.maxmum.x + (1 - i) as f64 * bbox.minmum.x;
+//                     let y = j as f64 * bbox.maxmum.y + (1 - j) as f64 * bbox.minmum.y;
+//                     let z = k as f64 * bbox.maxmum.z + (1 - k) as f64 * bbox.minmum.z;
 
-                    let newx = costheta * x + sintheta * y;
-                    let newy = -sintheta * x + costheta * y;
+//                     let newx = costheta * x + sintheta * y;
+//                     let newy = -sintheta * x + costheta * y;
 
-                    let tester = Vec3::new(newx, newy, z);
+//                     let tester = Vec3::new(newx, newy, z);
 
-                    for c in 0..3 {
-                        if c == 0 {
-                            min.x = fmin(min.x, tester.x);
-                            max.x = fmax(max.x, tester.x);
-                        } else if c == 1 {
-                            min.y = fmin(min.y, tester.y);
-                            max.y = fmax(max.y, tester.y);
-                        } else if c == 2 {
-                            min.z = fmin(min.z, tester.z);
-                            max.z = fmax(max.z, tester.z);
-                        }
-                    }
-                }
-            }
-        }
-        Self {
-            ptr: p.clone(),
-            sin_theta: sintheta,
-            cos_theta: costheta,
-            hash_box: flag,
-            bbox,
-        }
-    }
-}
+//                     for c in 0..3 {
+//                         if c == 0 {
+//                             min.x = fmin(min.x, tester.x);
+//                             max.x = fmax(max.x, tester.x);
+//                         } else if c == 1 {
+//                             min.y = fmin(min.y, tester.y);
+//                             max.y = fmax(max.y, tester.y);
+//                         } else if c == 2 {
+//                             min.z = fmin(min.z, tester.z);
+//                             max.z = fmax(max.z, tester.z);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         Self {
+//             ptr: p.clone(),
+//             sin_theta: sintheta,
+//             cos_theta: costheta,
+//             hash_box: flag,
+//             bbox,
+//         }
+//     }
+// }
 
-impl Hittable for RotateZ {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let mut origin = r.orig;
-        let mut direction = r.dir;
+// impl Hittable for RotateZ {
+//     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+//         let mut origin = r.orig;
+//         let mut direction = r.dir;
 
-        origin.x = self.cos_theta * r.orig.x - self.sin_theta * r.orig.y;
-        origin.y = self.cos_theta * r.orig.y + self.sin_theta * r.orig.x;
+//         origin.x = self.cos_theta * r.orig.x - self.sin_theta * r.orig.y;
+//         origin.y = self.cos_theta * r.orig.y + self.sin_theta * r.orig.x;
 
-        direction.x = self.cos_theta * r.dir.x - self.sin_theta * r.dir.y;
-        direction.y = self.cos_theta * r.dir.y + self.sin_theta * r.dir.x;
+//         direction.x = self.cos_theta * r.dir.x - self.sin_theta * r.dir.y;
+//         direction.y = self.cos_theta * r.dir.y + self.sin_theta * r.dir.x;
 
-        let rotate_r = Ray::new(origin, direction, r.time);
+//         let rotate_r = Ray::new(origin, direction, r.time);
 
-        if let Some(mut rec) = self.ptr.hit(&rotate_r, t_min, t_max) {
-            let mut p = rec.p;
-            let mut normal = rec.normal;
+//         if let Some(mut rec) = self.ptr.hit(&rotate_r, t_min, t_max) {
+//             let mut p = rec.p;
+//             let mut normal = rec.normal;
 
-            p.x = self.cos_theta * rec.p.x + self.sin_theta * rec.p.y;
-            p.y = self.cos_theta * rec.p.y - self.sin_theta * rec.p.x;
+//             p.x = self.cos_theta * rec.p.x + self.sin_theta * rec.p.y;
+//             p.y = self.cos_theta * rec.p.y - self.sin_theta * rec.p.x;
 
-            normal.x = self.cos_theta * rec.normal.x + self.sin_theta * rec.normal.y;
-            normal.y = self.cos_theta * rec.normal.y - self.sin_theta * rec.normal.x;
+//             normal.x = self.cos_theta * rec.normal.x + self.sin_theta * rec.normal.y;
+//             normal.y = self.cos_theta * rec.normal.y - self.sin_theta * rec.normal.x;
 
-            rec.p.x = p.x;
-            rec.p.y = p.y;
+//             rec.p.x = p.x;
+//             rec.p.y = p.y;
 
-            rec.normal.x = normal.x;
-            rec.normal.y = normal.y;
+//             rec.normal.x = normal.x;
+//             rec.normal.y = normal.y;
 
-            return Some(rec);
-        }
-        None
-    }
+//             return Some(rec);
+//         }
+//         None
+//     }
 
-    fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<AABB> {
-        let output_box = self.bbox.clone();
-        Some(output_box)
-    }
-}
+//     fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<AABB> {
+//         let output_box = self.bbox.clone();
+//         Some(output_box)
+//     }
+// }
 
-pub struct RotateX {
-    pub ptr: Arc<dyn Hittable>,
-    pub sin_theta: f64,
-    pub cos_theta: f64,
-    pub hash_box: bool,
-    pub bbox: AABB,
-}
+// pub struct RotateX {
+//     pub ptr: Arc<dyn Hittable>,
+//     pub sin_theta: f64,
+//     pub cos_theta: f64,
+//     pub hash_box: bool,
+//     pub bbox: AABB,
+// }
 
-impl RotateX {
-    pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
-        let radians = degrees_to_radians(angle);
-        let sintheta = radians.sin();
-        let costheta = radians.cos();
-        let mut flag = false;
-        let hashbox_ = p.bounding_box(0.0, 1.0);
-        let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
-        if let Some(bbbox) = hashbox_ {
-            bbox = bbbox;
-            flag = true;
-        }
+// impl RotateX {
+//     pub fn new(p: Arc<dyn Hittable>, angle: f64) -> Self {
+//         let radians = degrees_to_radians(angle);
+//         let sintheta = radians.sin();
+//         let costheta = radians.cos();
+//         let mut flag = false;
+//         let hashbox_ = p.bounding_box(0.0, 1.0);
+//         let mut bbox = AABB::new(Vec3::zero(), Vec3::zero());
+//         if let Some(bbbox) = hashbox_ {
+//             bbox = bbbox;
+//             flag = true;
+//         }
 
-        let mut min = Vec3::new(INFINITY, INFINITY, INFINITY);
-        let mut max = -min;
+//         let mut min = Vec3::new(INFINITY, INFINITY, INFINITY);
+//         let mut max = -min;
 
-        for i in 0..2 {
-            for j in 0..2 {
-                for k in 0..2 {
-                    let x = i as f64 * bbox.maxmum.x + (1 - i) as f64 * bbox.minmum.x;
-                    let y = j as f64 * bbox.maxmum.y + (1 - j) as f64 * bbox.minmum.y;
-                    let z = k as f64 * bbox.maxmum.z + (1 - k) as f64 * bbox.minmum.z;
+//         for i in 0..2 {
+//             for j in 0..2 {
+//                 for k in 0..2 {
+//                     let x = i as f64 * bbox.maxmum.x + (1 - i) as f64 * bbox.minmum.x;
+//                     let y = j as f64 * bbox.maxmum.y + (1 - j) as f64 * bbox.minmum.y;
+//                     let z = k as f64 * bbox.maxmum.z + (1 - k) as f64 * bbox.minmum.z;
 
-                    let newy = costheta * y + sintheta * z;
-                    let newz = -sintheta * y + costheta * z;
+//                     let newy = costheta * y + sintheta * z;
+//                     let newz = -sintheta * y + costheta * z;
 
-                    let tester = Vec3::new(x, newy, newz);
+//                     let tester = Vec3::new(x, newy, newz);
 
-                    for c in 0..3 {
-                        if c == 0 {
-                            min.x = fmin(min.x, tester.x);
-                            max.x = fmax(max.x, tester.x);
-                        } else if c == 1 {
-                            min.y = fmin(min.y, tester.y);
-                            max.y = fmax(max.y, tester.y);
-                        } else if c == 2 {
-                            min.z = fmin(min.z, tester.z);
-                            max.z = fmax(max.z, tester.z);
-                        }
-                    }
-                }
-            }
-        }
-        Self {
-            ptr: p.clone(),
-            sin_theta: sintheta,
-            cos_theta: costheta,
-            hash_box: flag,
-            bbox,
-        }
-    }
-}
+//                     for c in 0..3 {
+//                         if c == 0 {
+//                             min.x = fmin(min.x, tester.x);
+//                             max.x = fmax(max.x, tester.x);
+//                         } else if c == 1 {
+//                             min.y = fmin(min.y, tester.y);
+//                             max.y = fmax(max.y, tester.y);
+//                         } else if c == 2 {
+//                             min.z = fmin(min.z, tester.z);
+//                             max.z = fmax(max.z, tester.z);
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//         Self {
+//             ptr: p.clone(),
+//             sin_theta: sintheta,
+//             cos_theta: costheta,
+//             hash_box: flag,
+//             bbox,
+//         }
+//     }
+// }
 
-impl Hittable for RotateX {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let mut origin = r.orig;
-        let mut direction = r.dir;
+// impl Hittable for RotateX {
+//     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+//         let mut origin = r.orig;
+//         let mut direction = r.dir;
 
-        origin.y = self.cos_theta * r.orig.y - self.sin_theta * r.orig.z;
-        origin.z = self.cos_theta * r.orig.z + self.sin_theta * r.orig.y;
+//         origin.y = self.cos_theta * r.orig.y - self.sin_theta * r.orig.z;
+//         origin.z = self.cos_theta * r.orig.z + self.sin_theta * r.orig.y;
 
-        direction.y = self.cos_theta * r.dir.y - self.sin_theta * r.dir.z;
-        direction.z = self.cos_theta * r.dir.z + self.sin_theta * r.dir.y;
+//         direction.y = self.cos_theta * r.dir.y - self.sin_theta * r.dir.z;
+//         direction.z = self.cos_theta * r.dir.z + self.sin_theta * r.dir.y;
 
-        let rotate_r = Ray::new(origin, direction, r.time);
+//         let rotate_r = Ray::new(origin, direction, r.time);
 
-        if let Some(mut rec) = self.ptr.hit(&rotate_r, t_min, t_max) {
-            let mut p = rec.p;
-            let mut normal = rec.normal;
+//         if let Some(mut rec) = self.ptr.hit(&rotate_r, t_min, t_max) {
+//             let mut p = rec.p;
+//             let mut normal = rec.normal;
 
-            p.y = self.cos_theta * rec.p.y + self.sin_theta * rec.p.z;
-            p.z = self.cos_theta * rec.p.z - self.sin_theta * rec.p.y;
+//             p.y = self.cos_theta * rec.p.y + self.sin_theta * rec.p.z;
+//             p.z = self.cos_theta * rec.p.z - self.sin_theta * rec.p.y;
 
-            normal.y = self.cos_theta * rec.normal.y + self.sin_theta * rec.normal.z;
-            normal.z = self.cos_theta * rec.normal.z - self.sin_theta * rec.normal.y;
+//             normal.y = self.cos_theta * rec.normal.y + self.sin_theta * rec.normal.z;
+//             normal.z = self.cos_theta * rec.normal.z - self.sin_theta * rec.normal.y;
 
-            rec.p.y = p.y;
-            rec.p.z = p.z;
+//             rec.p.y = p.y;
+//             rec.p.z = p.z;
 
-            rec.normal.y = normal.y;
-            rec.normal.z = normal.z;
+//             rec.normal.y = normal.y;
+//             rec.normal.z = normal.z;
 
-            return Some(rec);
-        }
-        None
-    }
+//             return Some(rec);
+//         }
+//         None
+//     }
 
-    fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<AABB> {
-        let output_box = self.bbox.clone();
-        Some(output_box)
-    }
-}
+//     fn bounding_box(&self, _time0: f64, _time11: f64) -> Option<AABB> {
+//         let output_box = self.bbox.clone();
+//         Some(output_box)
+//     }
+// }
 
 pub struct Triangle {
     pub mp: Arc<dyn Material>,
@@ -577,7 +577,7 @@ pub struct Triangle {
     pub a2: Vec3,
     pub a3: Vec3,
 }
-
+#[allow(clippy::too_many_arguments)]
 impl Triangle {
     pub fn new(
         x1: f64,
@@ -611,7 +611,7 @@ impl Triangle {
         let s3 = Vec3::cross(bp, cp).len() / 2.0;
         let s = Vec3::cross(ab, ac).len() / 2.0;
 
-        if s == s1 + s2 + s3 {
+        if (s - (s1 + s2 + s3)).abs() < 0.0001 {
             return true;
         }
         false
