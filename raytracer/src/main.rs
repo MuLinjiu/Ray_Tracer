@@ -640,8 +640,8 @@ fn main() {
         );
         assert!(cornell_box.is_ok());
         let rate = 500.0;
-        let (models, materials) = cornell_box.expect("Failed to load OBJ file");
-        for (i, m) in models.iter().enumerate() {
+        let (models, _materials) = cornell_box.expect("Failed to load OBJ file");
+        for (_i, m) in models.iter().enumerate() {
             let mesh = &m.mesh;
             let mut boxes2 = HittableList { objects: vec![] };
             for v in 0..mesh.indices.len() / 3 {
